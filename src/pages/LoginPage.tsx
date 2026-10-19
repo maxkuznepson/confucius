@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { Globe, Moon, Sun } from 'lucide-react';
+import { formatPhone, getDefaultPhone } from '../utils/phone';
 
 export function LoginPage() {
   const { lang, setLang, darkMode, toggleDarkMode, login, navigateTo } = useApp();
   const [method, setMethod] = useState<'phone' | 'email'>('phone');
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState(getDefaultPhone());
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -95,7 +96,13 @@ export function LoginPage() {
             <input
               type={method === 'phone' ? 'tel' : 'email'}
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) => {
+                if (method === 'phone') {
+                  setIdentifier(formatPhone(e.target.value));
+                } else {
+                  setIdentifier(e.target.value);
+                }
+              }}
               placeholder={method === 'phone' ? t('phonePlaceholder', lang) : t('emailPlaceholder', lang)}
               className={`w-full px-4 py-3 rounded-xl border ${inputBg} focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
@@ -142,9 +149,10 @@ export function LoginPage() {
           {/* Test credentials hint */}
           <div className={`mt-4 p-3 rounded-xl text-xs ${darkMode ? 'bg-[#2A2018] text-[#E8D9A0]' : 'bg-white/70 text-gray-600'}`}>
             <p className="font-medium mb-1">{lang === 'ru' ? 'Тестовые данные:' : '测试账号：'}</p>
-            <p>student1 / 123 — {lang === 'ru' ? 'Ученик' : '学生'}</p>
+            <p>student1 / 123 — {lang === 'ru' ? 'Ученик (класс A-1)' : '学生（A-1班）'}</p>
             <p>parent1 / 123 — {lang === 'ru' ? 'Родитель' : '家长'}</p>
             <p>teacher1 / 123 — {lang === 'ru' ? 'Учитель' : '教师'}</p>
+            <p className="mt-1 opacity-70">{lang === 'ru' ? 'Всего: 60 учеников, 60 родителей, 10 учителей' : '共60名学生，60名家长，10名教师'}</p>
           </div>
         </form>
       </div>

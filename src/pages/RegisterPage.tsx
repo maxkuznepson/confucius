@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { TopAppBar } from '../components/TopAppBar';
+import { formatPhone, getDefaultPhone } from '../utils/phone';
 
 export function RegisterPage() {
   const { lang, darkMode, navigateTo, goBack } = useApp();
   const [form, setForm] = useState({
-    phone: '',
+    phone: getDefaultPhone(),
     email: '',
     lastName: '',
     firstName: '',
@@ -121,7 +122,7 @@ export function RegisterPage() {
             <input
               type="tel"
               value={form.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
+              onChange={(e) => handleChange('phone', formatPhone(e.target.value))}
               placeholder={t('phonePlaceholder', lang)}
               className={`w-full px-4 py-3 rounded-xl border ${inputBg} focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
@@ -149,7 +150,7 @@ export function RegisterPage() {
             <input
               type="tel"
               value={form.referrerPhone}
-              onChange={(e) => handleChange('referrerPhone', e.target.value)}
+              onChange={(e) => handleChange('referrerPhone', e.target.value ? formatPhone(e.target.value) : '')}
               className={`w-full px-4 py-3 rounded-xl border ${inputBg} focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
           </div>

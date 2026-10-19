@@ -200,413 +200,365 @@ export interface TeacherStudent {
   subject: string;
 }
 
+// =================== ГЕНЕРАЦИЯ ДАННЫХ ===================
+
+// Русские имена
+const russianFirstNames = ['Иван', 'Пётр', 'Анна', 'Мария', 'Алексей', 'Елена', 'Дмитрий', 'Ольга', 'Сергей', 'Наталья', 'Андрей', 'Татьяна', 'Михаил', 'Екатерина', 'Николай'];
+const russianLastNames = ['Иванов', 'Петров', 'Сидоров', 'Смирнов', 'Кузнецов', 'Попов', 'Волков', 'Соколов', 'Лебедев', 'Козлов', 'Новиков', 'Морозов'];
+const russianMiddleNames = ['Сергеевич', 'Петрович', 'Александрович', 'Дмитриевич', 'Николаевич', 'Сергеевна', 'Петровна', 'Александровна', 'Дмитриевна', 'Николаевна'];
+
+// Китайские имена
+const chineseSurnames = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
+const chineseGivenNames = ['伟', '芳', '娜', '敏', '静', '丽', '强', '磊', '洋', '勇', '艳', '杰', '娟', '涛', '明'];
+
+// Функция генерации случайного числа
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Функция выбора случайного элемента
+function randomChoice<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Генерация телефона по формуле
+function generatePhone(type: 'student1' | 'student2' | 'parent' | 'teacher', n: number): string {
+  let lastFour: number;
+  if (type === 'student1') {
+    lastFour = 3 * n + 1;
+  } else if (type === 'student2') {
+    lastFour = 3 * n + 2;
+  } else if (type === 'parent') {
+    lastFour = 3 * n + 3;
+  } else {
+    lastFour = 100 * n + 100;
+  }
+  return `+7-999-888-${String(lastFour).padStart(4, '0')}`;
+}
+
+// Генерация имени
+function generateName(gender: 'male' | 'female'): { ru: string; zh: string } {
+  const isMale = gender === 'male';
+  const firstName = randomChoice(isMale ? russianFirstNames.filter(n => ['Иван', 'Пётр', 'Алексей', 'Дмитрий', 'Сергей', 'Андрей', 'Михаил', 'Николай'].includes(n)) : russianFirstNames.filter(n => ['Анна', 'Мария', 'Елена', 'Ольга', 'Наталья', 'Татьяна', 'Екатерина'].includes(n)));
+  const lastName = randomChoice(russianLastNames) + (isMale ? '' : 'а');
+  const middleName = randomChoice(isMale ? russianMiddleNames.filter(n => n.endsWith('вич')) : russianMiddleNames.filter(n => n.endsWith('вна')));
+  
+  const chineseSurname = randomChoice(chineseSurnames);
+  const chineseGiven = randomChoice(chineseGivenNames) + (Math.random() > 0.5 ? randomChoice(chineseGivenNames) : '');
+  
+  return {
+    ru: `${lastName} ${firstName} ${middleName}`,
+    zh: `${chineseSurname}${chineseGiven}`
+  };
+}
+
+// Генерация данных для 6 классов
+const classes = ['A-1', 'A-2', 'B-1', 'B-2', 'C-1', 'C-2'];
+const classRanges = [[0, 4], [5, 9], [10, 14], [15, 19], [20, 24], [25, 29]];
+
 // =================== MOCK DATA ===================
 
-export const mockUsers: User[] = [
-  {
-    id: 'u-student-1',
-    username: 'student1',
+export const mockUsers: User[] = [];
+export const mockStudents: Student[] = [];
+export const mockParents: Parent[] = [];
+export const mockTeachers: Teacher[] = [];
+export const mockParentStudents: ParentStudent[] = [];
+export const mockTeacherStudents: TeacherStudent[] = [];
+export const mockCourses: Course[] = [];
+export const mockLessons: CourseLesson[] = [];
+export const mockHomeworks: Homework[] = [];
+export const mockSubmissions: HomeworkSubmission[] = [];
+export const mockGrades: Grade[] = [];
+export const mockLessonRatings: LessonRating[] = [];
+export const mockAttendance: Attendance[] = [];
+export const mockAchievements: Achievement[] = [];
+export const mockContests: Contest[] = [];
+export const mockEvents: Event[] = [];
+export const mockNotifications: Notification[] = [];
+export const mockPointsAccounts: PointsAccount[] = [];
+export const mockPointsTransactions: PointsTransaction[] = [];
+
+// Генерация учеников и родителей
+let studentCounter = 1;
+let parentCounter = 1;
+
+classes.forEach((className, classIndex) => {
+  const [startN, endN] = classRanges[classIndex];
+  
+  for (let n = startN; n <= endN; n++) {
+    // Два ученика на каждое значение n
+    for (let i = 0; i < 2; i++) {
+      const gender: 'male' | 'female' = Math.random() > 0.5 ? 'male' : 'female';
+      const name = generateName(gender);
+      const studentId = `s-${studentCounter}`;
+      const userId = `u-student-${studentCounter}`;
+      const phone = generatePhone(i === 0 ? 'student1' : 'student2', n);
+      
+      mockUsers.push({
+        id: userId,
+        username: `student${studentCounter}`,
+        password_hash: '123',
+        full_name: name.ru,
+        full_name_zh: name.zh,
+        email: `student${studentCounter}@school.cn`,
+        phone: phone,
+        role: 'student',
+        preferred_lang: 'ru',
+        is_active: true,
+      });
+      
+      mockStudents.push({
+        id: studentId,
+        user_id: userId,
+        class_id: `class-${classIndex + 1}`,
+        student_no: `STU-2024-${String(studentCounter).padStart(3, '0')}`,
+        birth_date: `${randomInt(2008, 2012)}-${String(randomInt(1, 12)).padStart(2, '0')}-${String(randomInt(1, 28)).padStart(2, '0')}`,
+        gender: gender,
+        enrollment_date: '2023-09-01',
+        status: 'active',
+      });
+      
+      // Родитель для этого ученика
+      const parentGender: 'male' | 'female' = Math.random() > 0.5 ? 'male' : 'female';
+      const parentName = generateName(parentGender);
+      const parentId = `p-${parentCounter}`;
+      const parentUserId = `u-parent-${parentCounter}`;
+      const parentPhone = generatePhone('parent', n);
+      
+      mockUsers.push({
+        id: parentUserId,
+        username: `parent${parentCounter}`,
+        password_hash: '123',
+        full_name: parentName.ru,
+        full_name_zh: parentName.zh,
+        email: `parent${parentCounter}@school.cn`,
+        phone: parentPhone,
+        role: 'parent',
+        preferred_lang: 'ru',
+        is_active: true,
+      });
+      
+      const occupations = ['Инженер', 'Врач', 'Учитель', 'Предприниматель', 'Менеджер', 'Программист', 'Бухгалтер', 'Юрист'];
+      mockParents.push({
+        id: parentId,
+        user_id: parentUserId,
+        occupation: randomChoice(occupations),
+      });
+      
+      mockParentStudents.push({
+        parent_id: parentId,
+        student_id: studentId,
+        relation: parentGender === 'male' ? 'father' : 'mother',
+        is_primary: true,
+      });
+      
+      studentCounter++;
+      parentCounter++;
+    }
+  }
+});
+
+// Генерация учителей (10 учителей)
+for (let n = 0; n < 10; n++) {
+  const gender: 'male' | 'female' = Math.random() > 0.5 ? 'male' : 'female';
+  const name = generateName(gender);
+  const teacherId = `t-${n + 1}`;
+  const userId = `u-teacher-${n + 1}`;
+  const phone = generatePhone('teacher', n);
+  
+  const specializations = [
+    { ru: 'Китайский язык', zh: '汉语' },
+    { ru: 'Математика', zh: '数学' },
+    { ru: 'Каллиграфия', zh: '书法' },
+    { ru: 'История Китая', zh: '中国历史' },
+    { ru: 'Литература', zh: '文学' },
+  ];
+  const spec = randomChoice(specializations);
+  
+  mockUsers.push({
+    id: userId,
+    username: `teacher${n + 1}`,
     password_hash: '123',
-    full_name: 'Иванов Иван Петрович',
-    full_name_zh: '伊万诺夫·伊万',
-    email: 'ivanov@student.cn',
-    phone: '+7-999-111-11-11',
-    role: 'student',
-    preferred_lang: 'ru',
-    is_active: true,
-  },
-  {
-    id: 'u-student-2',
-    username: 'student2',
-    password_hash: '123',
-    full_name: 'Иванова Анна Петровна',
-    full_name_zh: '伊万诺娃·安娜',
-    email: 'anna@student.cn',
-    phone: '+7-999-222-22-22',
-    role: 'student',
-    preferred_lang: 'ru',
-    is_active: true,
-  },
-  {
-    id: 'u-parent-1',
-    username: 'parent1',
-    password_hash: '123',
-    full_name: 'Иванов Пётр Сергеевич',
-    full_name_zh: '伊万诺夫·彼得',
-    email: 'ivanov@parent.cn',
-    phone: '+7-999-333-33-33',
-    role: 'parent',
-    preferred_lang: 'ru',
-    is_active: true,
-  },
-  {
-    id: 'u-teacher-1',
-    username: 'teacher1',
-    password_hash: '123',
-    full_name: 'Ли Мэй Хуа',
-    full_name_zh: '李梅花',
-    email: 'limei@school.cn',
-    phone: '+7-999-444-44-44',
+    full_name: name.ru,
+    full_name_zh: name.zh,
+    email: `teacher${n + 1}@school.cn`,
+    phone: phone,
     role: 'teacher',
-    preferred_lang: 'zh',
+    preferred_lang: Math.random() > 0.5 ? 'ru' : 'zh',
     is_active: true,
-  },
-  {
-    id: 'u-teacher-2',
-    username: 'teacher2',
-    password_hash: '123',
-    full_name: 'Ван Мин',
-    full_name_zh: '王明',
-    email: 'wangmin@school.cn',
-    phone: '+7-999-555-55-55',
-    role: 'teacher',
-    preferred_lang: 'zh',
-    is_active: true,
-  },
-];
-
-export const mockStudents: Student[] = [
-  {
-    id: 's-1',
-    user_id: 'u-student-1',
-    class_id: 'c-1',
-    student_no: 'STU-2024-001',
-    birth_date: '2010-05-15',
-    gender: 'male',
-    enrollment_date: '2023-09-01',
+  });
+  
+  mockTeachers.push({
+    id: teacherId,
+    user_id: userId,
+    employee_no: `EMP-${String(n + 1).padStart(3, '0')}`,
+    specialization: spec.ru,
+    specialization_zh: spec.zh,
     status: 'active',
-  },
-  {
-    id: 's-2',
-    user_id: 'u-student-2',
-    class_id: 'c-1',
-    student_no: 'STU-2024-002',
-    birth_date: '2011-03-20',
-    gender: 'female',
-    enrollment_date: '2023-09-01',
-    status: 'active',
-  },
+  });
+}
+
+// Назначить учителей ученикам
+mockStudents.forEach((student, idx) => {
+  const teacherIdx = idx % mockTeachers.length;
+  mockTeacherStudents.push({
+    teacher_id: mockTeachers[teacherIdx].id,
+    student_id: student.id,
+    subject: mockTeachers[teacherIdx].specialization,
+  });
+});
+
+// Курсы
+const courseData = [
+  { code: 'ZH-101', title: 'Китайский язык — начальный', title_zh: '初级汉语', subject: 'Китайский язык', type: 'live' as const, additional: false },
+  { code: 'MATH-101', title: 'Математика — базовый курс', title_zh: '基础数学', subject: 'Математика', type: 'live' as const, additional: false },
+  { code: 'CALL-201', title: 'Каллиграфия', title_zh: '书法课', subject: 'Каллиграфия', type: 'offline' as const, additional: true },
+  { code: 'CULT-301', title: 'Культура Китая', title_zh: '中国文化', subject: 'Культурология', type: 'offline' as const, additional: true },
 ];
 
-export const mockParents: Parent[] = [
-  {
-    id: 'p-1',
-    user_id: 'u-parent-1',
-    occupation: 'Инженер',
-  },
-];
-
-export const mockTeachers: Teacher[] = [
-  {
-    id: 't-1',
-    user_id: 'u-teacher-1',
-    employee_no: 'EMP-001',
-    specialization: 'Китайский язык, Каллиграфия',
-    specialization_zh: '汉语，书法',
-    status: 'active',
-  },
-  {
-    id: 't-2',
-    user_id: 'u-teacher-2',
-    employee_no: 'EMP-002',
-    specialization: 'Математика, Логика',
-    specialization_zh: '数学，逻辑',
-    status: 'active',
-  },
-];
-
-export const mockParentStudents: ParentStudent[] = [
-  { parent_id: 'p-1', student_id: 's-1', relation: 'father', is_primary: true },
-  { parent_id: 'p-1', student_id: 's-2', relation: 'father', is_primary: false },
-];
-
-export const mockTeacherStudents: TeacherStudent[] = [
-  { teacher_id: 't-1', student_id: 's-1', subject: 'Китайский язык' },
-  { teacher_id: 't-1', student_id: 's-2', subject: 'Китайский язык' },
-  { teacher_id: 't-2', student_id: 's-1', subject: 'Математика' },
-  { teacher_id: 't-2', student_id: 's-2', subject: 'Математика' },
-];
-
-export const mockCourses: Course[] = [
-  {
-    id: 'crs-1',
-    code: 'ZH-101',
-    title: 'Китайский язык — начальный',
-    title_zh: '初级汉语',
-    description: 'Основы китайского языка для начинающих',
-    description_zh: '汉语入门基础',
-    course_type: 'live',
-    subject: 'Китайский язык',
-    is_free: false,
-    price: 15000,
-    is_additional: false,
+courseData.forEach((c, idx) => {
+  mockCourses.push({
+    id: `crs-${idx + 1}`,
+    code: c.code,
+    title: c.title,
+    title_zh: c.title_zh,
+    description: `Курс "${c.title}"`,
+    description_zh: `课程"${c.title_zh}"`,
+    course_type: c.type,
+    subject: c.subject,
+    is_free: c.additional,
+    price: c.additional ? 0 : randomInt(10000, 20000),
+    is_additional: c.additional,
     status: 'published',
-  },
-  {
-    id: 'crs-2',
-    code: 'MATH-101',
-    title: 'Математика — базовый курс',
-    title_zh: '基础数学',
-    description: 'Базовый курс математики',
-    description_zh: '数学基础课程',
-    course_type: 'live',
-    subject: 'Математика',
-    is_free: false,
-    price: 12000,
-    is_additional: false,
-    status: 'published',
-  },
-  {
-    id: 'crs-3',
-    code: 'CALL-201',
-    title: 'Каллиграфия',
-    title_zh: '书法课',
-    description: 'Дополнительное занятие по каллиграфии',
-    description_zh: '书法选修课',
-    course_type: 'offline',
-    subject: 'Каллиграфия',
-    is_free: true,
-    price: 0,
-    is_additional: true,
-    status: 'published',
-  },
-  {
-    id: 'crs-4',
-    code: 'CULT-301',
-    title: 'Культура Китая',
-    title_zh: '中国文化',
-    description: 'Дополнительное занятие по культуре',
-    description_zh: '文化选修课',
-    course_type: 'offline',
-    subject: 'Культурология',
-    is_free: true,
-    price: 0,
-    is_additional: true,
-    status: 'published',
-  },
-];
+  });
+});
 
-export const mockLessons: CourseLesson[] = [
-  {
-    id: 'l-1',
-    course_id: 'crs-1',
-    title: 'Урок 1: Приветствия',
-    title_zh: '第一课：问候',
-    lesson_order: 1,
-    scheduled_at: '2025-01-20T10:00:00',
-    duration_min: 45,
-    room: 'А-101',
-    live_status: 'finished',
-  },
-  {
-    id: 'l-2',
-    course_id: 'crs-1',
-    title: 'Урок 2: Числа',
-    title_zh: '第二课：数字',
-    lesson_order: 2,
-    scheduled_at: '2025-01-22T10:00:00',
-    duration_min: 45,
-    room: 'А-101',
-    live_status: 'finished',
-  },
-  {
-    id: 'l-3',
-    course_id: 'crs-1',
-    title: 'Урок 3: Семья',
-    title_zh: '第三课：家庭',
-    lesson_order: 3,
-    scheduled_at: '2025-01-27T10:00:00',
-    duration_min: 45,
-    room: 'А-101',
-    live_status: 'live',
-  },
-  {
-    id: 'l-4',
-    course_id: 'crs-2',
-    title: 'Урок 1: Арифметика',
-    title_zh: '第一课：算术',
-    lesson_order: 1,
-    scheduled_at: '2025-01-21T14:00:00',
-    duration_min: 60,
-    room: 'Б-202',
-    live_status: 'finished',
-  },
-  {
-    id: 'l-5',
-    course_id: 'crs-2',
-    title: 'Урок 2: Геометрия',
-    title_zh: '第二课：几何',
-    lesson_order: 2,
-    scheduled_at: '2025-01-28T14:00:00',
-    duration_min: 60,
-    room: 'Б-202',
-    live_status: 'upcoming',
-  },
-  {
-    id: 'l-6',
-    course_id: 'crs-3',
-    title: 'Занятие 1: Иероглифы',
-    title_zh: '第一课：汉字',
-    lesson_order: 1,
-    scheduled_at: '2025-01-25T16:00:00',
-    duration_min: 30,
-    room: 'В-303',
-    live_status: 'upcoming',
-  },
-];
+// Уроки
+let lessonCounter = 1;
+mockCourses.forEach(course => {
+  for (let i = 1; i <= 5; i++) {
+    const status = i <= 3 ? 'finished' : i === 4 ? 'live' : 'upcoming';
+    mockLessons.push({
+      id: `l-${lessonCounter}`,
+      course_id: course.id,
+      title: `Урок ${i}`,
+      title_zh: `第${i}课`,
+      lesson_order: i,
+      scheduled_at: `2025-01-${String(15 + i).padStart(2, '0')}T${String(9 + i).padStart(2, '0')}:00:00`,
+      duration_min: randomInt(30, 60),
+      room: `${String.fromCharCode(65 + (lessonCounter % 3))}-${randomInt(100, 399)}`,
+      live_status: status as any,
+    });
+    lessonCounter++;
+  }
+});
 
-export const mockHomeworks: Homework[] = [
-  {
-    id: 'hw-1',
-    course_id: 'crs-1',
-    title: 'Выучить приветствия',
-    title_zh: '学习问候语',
-    description: 'Выучить 10 приветствий на китайском',
-    hw_type: 'vocabulary',
-    max_score: 100,
-    published_at: '2025-01-20T11:00:00',
-    deadline_at: '2025-01-25T23:59:00',
-    allow_late: false,
-  },
-  {
-    id: 'hw-2',
-    course_id: 'crs-1',
-    title: 'Написать иероглифы',
-    title_zh: '写汉字',
-    description: 'Написать иероглифы из урока 2',
-    hw_type: 'writing',
-    max_score: 100,
-    published_at: '2025-01-22T11:00:00',
-    deadline_at: '2025-01-29T23:59:00',
-    allow_late: true,
-  },
-  {
-    id: 'hw-3',
-    course_id: 'crs-2',
-    title: 'Решить задачи',
-    title_zh: '解题',
-    description: 'Решить 10 задач по арифметике',
-    hw_type: 'practice',
-    max_score: 100,
-    published_at: '2025-01-21T15:00:00',
-    deadline_at: '2025-01-23T23:59:00',
-    allow_late: false,
-  },
-  {
-    id: 'hw-4',
-    course_id: 'crs-1',
-    title: 'Диалог с родителями',
-    title_zh: '与父母对话',
-    description: 'Провести диалог на китайском с родителями',
-    hw_type: 'speaking',
-    max_score: 50,
-    published_at: '2025-01-15T11:00:00',
-    deadline_at: '2025-01-18T23:59:00',
-    allow_late: false,
-  },
-];
+// Домашние задания
+let hwCounter = 1;
+mockCourses.slice(0, 2).forEach(course => {
+  for (let i = 1; i <= 3; i++) {
+    mockHomeworks.push({
+      id: `hw-${hwCounter}`,
+      course_id: course.id,
+      title: `Задание ${i}`,
+      title_zh: `作业${i}`,
+      description: `Выполнить задание по курсу "${course.title}"`,
+      hw_type: randomChoice(['vocabulary', 'writing', 'practice', 'speaking']),
+      max_score: 100,
+      published_at: `2025-01-${String(10 + i).padStart(2, '0')}T10:00:00`,
+      deadline_at: `2025-01-${String(20 + i).padStart(2, '0')}T23:59:00`,
+      allow_late: Math.random() > 0.5,
+    });
+    hwCounter++;
+  }
+});
 
-export const mockSubmissions: HomeworkSubmission[] = [
-  {
-    id: 'sub-1',
-    homework_id: 'hw-1',
-    student_id: 's-1',
-    status: 'graded',
-    submitted_at: '2025-01-24T18:00:00',
-    score: 85,
-    correctness: 85,
-    time_spent_min: 30,
-  },
-  {
-    id: 'sub-2',
-    homework_id: 'hw-2',
-    student_id: 's-1',
-    status: 'pending',
-  },
-  {
-    id: 'sub-3',
-    homework_id: 'hw-3',
-    student_id: 's-1',
-    status: 'overdue',
-  },
-  {
-    id: 'sub-4',
-    homework_id: 'hw-4',
-    student_id: 's-1',
-    status: 'graded',
-    submitted_at: '2025-01-17T20:00:00',
-    score: 40,
-    correctness: 80,
-    time_spent_min: 15,
-  },
-];
+// Оценки, посещаемость, достижения и т.д. для каждого ученика
+let gradeId = 1;
+let attendanceId = 1;
+let ratingId = 1;
+let submissionId = 1;
 
-export const mockGrades: Grade[] = [
-  { id: 1, student_id: 's-1', subject: 'Китайский язык', grade_type: 'lesson', period_label: 'Январь 2025', score: 4.5, max_score: 5, graded_at: '2025-01-20' },
-  { id: 2, student_id: 's-1', subject: 'Китайский язык', grade_type: 'lesson', period_label: 'Январь 2025', score: 5, max_score: 5, graded_at: '2025-01-22' },
-  { id: 3, student_id: 's-1', subject: 'Математика', grade_type: 'lesson', period_label: 'Январь 2025', score: 4, max_score: 5, graded_at: '2025-01-21' },
-  { id: 4, student_id: 's-1', subject: 'Китайский язык', grade_type: 'monthly', period_label: 'Декабрь 2024', score: 4.2, max_score: 5, graded_at: '2024-12-30' },
-  { id: 5, student_id: 's-1', subject: 'Математика', grade_type: 'monthly', period_label: 'Декабрь 2024', score: 3.8, max_score: 5, graded_at: '2024-12-30' },
-  { id: 6, student_id: 's-1', subject: 'Китайский язык', grade_type: 'semester', period_label: 'Осень 2024', score: 4.3, max_score: 5, graded_at: '2024-12-25' },
-  { id: 7, student_id: 's-2', subject: 'Китайский язык', grade_type: 'lesson', period_label: 'Январь 2025', score: 5, max_score: 5, graded_at: '2025-01-20' },
-  { id: 8, student_id: 's-2', subject: 'Математика', grade_type: 'lesson', period_label: 'Январь 2025', score: 4.5, max_score: 5, graded_at: '2025-01-21' },
-];
+mockStudents.forEach(student => {
+  // Оценки
+  for (let i = 0; i < randomInt(5, 15); i++) {
+    mockGrades.push({
+      id: gradeId++,
+      student_id: student.id,
+      subject: randomChoice(['Китайский язык', 'Математика']),
+      grade_type: randomChoice(['lesson', 'monthly', 'semester']),
+      period_label: 'Январь 2025',
+      score: parseFloat((Math.random() * 2 + 3).toFixed(1)),
+      max_score: 5,
+      graded_at: `2025-01-${String(randomInt(1, 28)).padStart(2, '0')}`,
+    });
+  }
+  
+  // Посещаемость
+  mockLessons.slice(0, 5).forEach(lesson => {
+    const statuses: Array<'present' | 'late' | 'absent' | 'excused'> = ['present', 'present', 'present', 'late', 'absent'];
+    mockAttendance.push({
+      id: attendanceId++,
+      student_id: student.id,
+      lesson_id: lesson.id,
+      status: randomChoice(statuses),
+      marked_at: lesson.scheduled_at.split('T')[0],
+    });
+  });
+  
+  // Рейтинги уроков
+  mockLessons.slice(0, 3).forEach(lesson => {
+    mockLessonRatings.push({
+      id: ratingId++,
+      lesson_id: lesson.id,
+      student_id: student.id,
+      stars: randomInt(3, 5),
+      comment: randomChoice(['Отличная работа!', 'Хорошо, но нужно больше практики', 'Внимателен на уроке', 'Активно участвует']),
+      rated_at: lesson.scheduled_at.split('T')[0],
+    });
+  });
+  
+  // Домашние задания
+  mockHomeworks.slice(0, 2).forEach(hw => {
+    const statuses: Array<'pending' | 'submitted' | 'graded' | 'overdue'> = ['pending', 'graded', 'graded', 'overdue'];
+    const status = randomChoice(statuses);
+    mockSubmissions.push({
+      id: `sub-${submissionId++}`,
+      homework_id: hw.id,
+      student_id: student.id,
+      status: status,
+      submitted_at: status !== 'pending' ? `2025-01-${String(randomInt(15, 25)).padStart(2, '0')}T18:00:00` : undefined,
+      score: status === 'graded' ? randomInt(60, 100) : undefined,
+      correctness: status === 'graded' ? randomInt(60, 100) : undefined,
+      time_spent_min: status !== 'pending' ? randomInt(15, 60) : undefined,
+    });
+  });
+  
+  // Достижения (не у всех)
+  if (Math.random() > 0.6) {
+    const categories: Array<'class' | 'school' | 'external'> = ['class', 'school', 'external'];
+    const cat = randomChoice(categories);
+    mockAchievements.push({
+      id: `ach-${student.id}`,
+      student_id: student.id,
+      category: cat,
+      title: cat === 'class' ? 'Лучший ученик месяца' : cat === 'school' ? 'Победитель олимпиады' : 'Сертификат HSK',
+      title_zh: cat === 'class' ? '月度最佳学生' : cat === 'school' ? '比赛冠军' : 'HSK证书',
+      description: 'За отличные результаты',
+      issuer: 'Школа Конфуция',
+      issued_date: `2024-${String(randomInt(1, 12)).padStart(2, '0')}-${String(randomInt(1, 28)).padStart(2, '0')}`,
+    });
+  }
+});
 
-export const mockLessonRatings: LessonRating[] = [
-  { id: 1, lesson_id: 'l-1', student_id: 's-1', stars: 5, comment: 'Отличная работа на уроке!', rated_at: '2025-01-20' },
-  { id: 2, lesson_id: 'l-2', student_id: 's-1', stars: 4, comment: 'Хорошо, но нужно больше практики', rated_at: '2025-01-22' },
-  { id: 3, lesson_id: 'l-4', student_id: 's-1', stars: 4, comment: 'Внимателен на уроке', rated_at: '2025-01-21' },
-];
-
-export const mockAttendance: Attendance[] = [
-  { id: 1, student_id: 's-1', lesson_id: 'l-1', status: 'present', marked_at: '2025-01-20' },
-  { id: 2, student_id: 's-1', lesson_id: 'l-2', status: 'present', marked_at: '2025-01-22' },
-  { id: 3, student_id: 's-1', lesson_id: 'l-4', status: 'late', marked_at: '2025-01-21' },
-  { id: 4, student_id: 's-2', lesson_id: 'l-1', status: 'present', marked_at: '2025-01-20' },
-  { id: 5, student_id: 's-2', lesson_id: 'l-2', status: 'absent', marked_at: '2025-01-22' },
-  { id: 6, student_id: 's-2', lesson_id: 'l-4', status: 'present', marked_at: '2025-01-21' },
-];
-
-export const mockAchievements: Achievement[] = [
-  {
-    id: 'ach-1',
-    student_id: 's-1',
-    category: 'class',
-    title: 'Лучший ученик месяца',
-    title_zh: '月度最佳学生',
-    description: 'За отличные результаты в январе',
-    issuer: 'Школа Конфуция',
-    issued_date: '2025-01-31',
-  },
-  {
-    id: 'ach-2',
-    student_id: 's-1',
-    category: 'school',
-    title: 'Победитель олимпиады по каллиграфии',
-    title_zh: '书法比赛冠军',
-    description: '1 место в школьной олимпиаде',
-    issuer: 'Школа Конфуция',
-    issued_date: '2024-12-15',
-  },
-  {
-    id: 'ach-3',
-    student_id: 's-1',
-    category: 'external',
-    title: 'HSK Level 2',
-    title_zh: 'HSK 二级',
-    description: 'Сертификат HSK Level 2',
-    issuer: 'Hanban',
-    issued_date: '2024-11-20',
-  },
-];
-
-export const mockContests: Contest[] = [
+// Конкурсы
+mockContests.push(
   {
     id: 'cnt-1',
     title: 'Конкурс каллиграфии',
     title_zh: '书法比赛',
-    description: 'Ежегодный конкурс каллиграфии среди учеников',
-    description_zh: '年度学生书法比赛',
+    description: 'Ежегодный конкурс каллиграфии',
+    description_zh: '年度书法比赛',
     rules: 'Участники пишут иероглифы в течение 30 минут',
     start_date: '2025-02-15',
     end_date: '2025-02-15',
@@ -624,10 +576,11 @@ export const mockContests: Contest[] = [
     end_date: '2025-03-01',
     registration_deadline: '2025-02-25',
     status: 'open',
-  },
-];
+  }
+);
 
-export const mockEvents: Event[] = [
+// Мероприятия
+mockEvents.push(
   {
     id: 'evt-1',
     title: 'День открытых дверей',
@@ -655,66 +608,42 @@ export const mockEvents: Event[] = [
     is_paid: true,
     price: 500,
     status: 'open',
-  },
-];
+  }
+);
 
-export const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    user_id: 'u-student-1',
-    type: 'homework',
-    title: 'Новое домашнее задание',
-    title_zh: '新作业',
-    body: 'Выучить приветствия — дедлайн 25 января',
-    body_zh: '学习问候语 — 截止1月25日',
-    is_read: false,
-    created_at: '2025-01-20T11:00:00',
-  },
-  {
-    id: 2,
-    user_id: 'u-student-1',
-    type: 'course',
-    title: 'Напоминание о занятии',
-    title_zh: '课程提醒',
-    body: 'Через 15 минут начинается урок китайского языка',
-    body_zh: '15分钟后开始汉语课',
-    is_read: false,
-    created_at: '2025-01-27T09:45:00',
-  },
-  {
-    id: 3,
-    user_id: 'u-student-1',
+// Уведомления для первых нескольких пользователей
+mockUsers.slice(0, 10).forEach((user, idx) => {
+  mockNotifications.push({
+    id: idx + 1,
+    user_id: user.id,
     type: 'system',
-    title: 'Оценка выставлена',
-    title_zh: '成绩已发布',
-    body: 'Вам выставлена оценка за урок "Числа"',
-    body_zh: '您已获得"数字"课的成绩',
-    is_read: true,
-    created_at: '2025-01-22T15:00:00',
-  },
-  {
-    id: 4,
-    user_id: 'u-parent-1',
-    type: 'school',
-    title: 'День открытых дверей',
-    title_zh: '开放日',
-    body: '20 февраля — день открытых дверей',
-    body_zh: '2月20日开放日',
+    title: 'Добро пожаловать!',
+    title_zh: '欢迎！',
+    body: 'Ваш аккаунт успешно создан',
+    body_zh: '您的账户已成功创建',
     is_read: false,
-    created_at: '2025-01-25T10:00:00',
-  },
-];
+    created_at: '2025-01-20T10:00:00',
+  });
+});
 
-export const mockPointsAccounts: PointsAccount[] = [
-  { user_id: 'u-parent-1', balance: 450000, total_earned: 600000 },
-];
-
-export const mockPointsTransactions: PointsTransaction[] = [
-  { id: 1, user_id: 'u-parent-1', source: 'purchase', amount: 150000, description: 'Покупка курса', description_zh: '购买课程', created_at: '2024-12-01' },
-  { id: 2, user_id: 'u-parent-1', source: 'referral', amount: 50000, description: 'Привлечение друга', description_zh: '推荐好友', created_at: '2024-12-15' },
-  { id: 3, user_id: 'u-parent-1', source: 'purchase', amount: 250000, description: 'Покупка учебников', description_zh: '购买教材', created_at: '2025-01-10' },
-  { id: 4, user_id: 'u-parent-1', source: 'manual', amount: 150000, description: 'Бонус за активность', description_zh: '活跃奖励', created_at: '2025-01-20' },
-];
+// Баллы для родителей
+mockParents.forEach((parent, idx) => {
+  mockPointsAccounts.push({
+    user_id: parent.user_id,
+    balance: randomInt(100000, 500000),
+    total_earned: randomInt(500000, 1000000),
+  });
+  
+  mockPointsTransactions.push({
+    id: idx + 1,
+    user_id: parent.user_id,
+    source: 'purchase',
+    amount: randomInt(50000, 200000),
+    description: 'Покупка курса',
+    description_zh: '购买课程',
+    created_at: '2025-01-15',
+  });
+});
 
 // Helper: find user by credentials
 export function authenticateUser(username: string, password: string): User | null {
