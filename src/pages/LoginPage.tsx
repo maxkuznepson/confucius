@@ -11,6 +11,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const { apiStatus, apiError } = useApp();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -161,6 +163,27 @@ export function LoginPage() {
             >
               {t('registerLink', lang)}
             </button>
+          </div>
+
+          {/* API Status indicator */}
+          <div className={`mt-4 p-3 rounded-xl text-xs ${
+            apiStatus === 'mock' 
+              ? (darkMode ? 'bg-[#2A2018] text-yellow-400' : 'bg-yellow-100 text-yellow-800')
+              : apiStatus === 'connected'
+              ? (darkMode ? 'bg-[#2A2018] text-green-400' : 'bg-green-100 text-green-800')
+              : apiStatus === 'error'
+              ? (darkMode ? 'bg-[#2A2018] text-red-400' : 'bg-red-100 text-red-800')
+              : (darkMode ? 'bg-[#2A2018] text-gray-400' : 'bg-gray-100 text-gray-600')
+          }`}>
+            <p className="font-medium mb-1">
+              {apiStatus === 'checking' && (lang === 'ru' ? '⏳ Проверка подключения...' : '⏳ 检查连接...')}
+              {apiStatus === 'mock' && (lang === 'ru' ? '🔧 Режим: MOCK (локальные данные)' : '🔧 模式：MOCK（本地数据）')}
+              {apiStatus === 'connected' && (lang === 'ru' ? '✅ Режим: API (сервер подключён)' : '✅ 模式：API（服务器已连接）')}
+              {apiStatus === 'error' && (lang === 'ru' ? '❌ Режим: API (ошибка подключения)' : '❌ 模式：API（连接错误）')}
+            </p>
+            {apiStatus === 'error' && apiError && (
+              <p className="text-xs opacity-70 mt-1">{apiError}</p>
+            )}
           </div>
 
           {/* Test credentials hint */}
