@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Lang } from '../i18n/translations';
-import { User, authenticateUser, getStudentByUserId, getParentByUserId, getTeacherByUserId, Student, Parent, Teacher } from '../data/mock';
+import { User, Student, Parent, Teacher } from '../data/mock';
+import { api } from '../services';
 
 interface AuthState {
   user: User | null;
@@ -15,7 +16,7 @@ interface AppContextType {
   darkMode: boolean;
   toggleDarkMode: () => void;
   auth: AuthState;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   navigateTo: (path: string) => void;
   currentPath: string;
@@ -35,27 +36,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const toggleDarkMode = useCallback(() => setDarkMode(d => !d), []);
 
-  const login = useCallback((username: string, password: string): boolean => {
-    const user = authenticateUser(username, password);
-    if (!user) return false;
+  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await api.login(username, password);
+      if (!response) return false;
 
-    const student = user.role === 'student' ? getStudentByUserId(user.id) || null : null;
-    const parent = user.role === 'parent' ? getParentByUserId(user.id) || null : null;
-    const teacher = user.role === 'teacher' ? getTeacherByUserId(user.id) || null : null;
+      const { user, role, profile } = response;
+      const student = role === 'student' ? (profile as Student) : null;
+      const parent = role === 'parent' ? (profile as Parent) : null;
+      const teacher = role === 'teacher' ? (profile as Teacher) : null;
 
-    setAuth({ user, student, parent, teacher });
+      setAuth({ user, student, parent, teacher });
 
-    let nextPath = '/login';
-    if (user.role === 'student' && student) nextPath = `/child/${student.id}`;
-    else if (user.role === 'parent' && parent) nextPath = `/parent/${parent.id}`;
-    else if (user.role === 'teacher' && teacher) nextPath = `/teacher/${teacher.id}`;
+      let nextPath = '/login';
+      if (role === 'student' && student) nextPath = `/child/${student.id}`;
+      else if (role === 'parent' && parent) nextPath = `/parent/${parent.id}`;
+      else if (role === 'teacher' && teacher) nextPath = `/teacher/${teacher.id}`;
 
-    setCurrentPath(nextPath);
-    setHistory([nextPath]);
-    return true;
+      setCurrentPath(nextPath);
+      setHistory([nextPath]);
+      return true;
+    } catch (error) {
+      console.error('[Login Error]', error);
+      return false;
+    }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch (error) {
+      console.error('[Logout Error]', error);
+    }
     setAuth({ user: null, student: null, parent: null, teacher: null });
     setCurrentPath('/login');
     setHistory(['/login']);

@@ -11,12 +11,16 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(identifier, password);
-    if (!success) {
-      setError(lang === 'ru' ? 'Неверный логин или пароль' : '用户名或密码错误');
+    try {
+      const success = await login(identifier, password);
+      if (!success) {
+        setError(lang === 'ru' ? 'Неверный логин или пароль' : '用户名或密码错误');
+      }
+    } catch (error) {
+      setError(lang === 'ru' ? 'Ошибка входа' : '登录错误');
     }
   };
 
