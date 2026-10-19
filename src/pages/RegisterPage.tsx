@@ -8,7 +8,7 @@ export function RegisterPage() {
   const { lang, darkMode, navigateTo, goBack } = useApp();
   const [form, setForm] = useState({
     phone: getDefaultPhone(),
-    email: '',
+    email: '@confucius.ru',
     lastName: '',
     firstName: '',
     middleName: '',

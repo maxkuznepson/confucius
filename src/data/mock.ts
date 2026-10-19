@@ -300,7 +300,7 @@ classes.forEach((className, classIndex) => {
         password_hash: '123',
         full_name: name.ru,
         full_name_zh: name.zh,
-        email: `student${studentCounter}@school.cn`,
+        email: `student${studentCounter}@confucius.ru`,
         phone: phone,
         role: 'student',
         preferred_lang: 'ru',
@@ -331,7 +331,7 @@ classes.forEach((className, classIndex) => {
         password_hash: '123',
         full_name: parentName.ru,
         full_name_zh: parentName.zh,
-        email: `parent${parentCounter}@school.cn`,
+        email: `parent${parentCounter}@confucius.ru`,
         phone: parentPhone,
         role: 'parent',
         preferred_lang: 'ru',
@@ -381,7 +381,7 @@ for (let n = 0; n < 10; n++) {
     password_hash: '123',
     full_name: name.ru,
     full_name_zh: name.zh,
-    email: `teacher${n + 1}@school.cn`,
+    email: `teacher${n + 1}@confucius.ru`,
     phone: phone,
     role: 'teacher',
     preferred_lang: Math.random() > 0.5 ? 'ru' : 'zh',
@@ -645,9 +645,28 @@ mockParents.forEach((parent, idx) => {
   });
 });
 
-// Helper: find user by credentials
-export function authenticateUser(username: string, password: string): User | null {
-  const user = mockUsers.find(u => u.username === username && u.password_hash === password);
+// Helper: find user by credentials (username, email, or phone)
+export function authenticateUser(identifier: string, password: string): User | null {
+  // Нормализуем телефон для сравнения (убираем всё кроме цифр)
+  const normalizedPhone = identifier.replace(/\D/g, '');
+  
+  const user = mockUsers.find(u => {
+    // Проверка пароля
+    if (u.password_hash !== password) return false;
+    
+    // Проверка по username
+    if (u.username === identifier) return true;
+    
+    // Проверка по email
+    if (u.email === identifier) return true;
+    
+    // Проверка по телефону (сравниваем нормализованные номера)
+    const userPhone = u.phone.replace(/\D/g, '');
+    if (normalizedPhone && userPhone === normalizedPhone) return true;
+    
+    return false;
+  });
+  
   return user || null;
 }
 

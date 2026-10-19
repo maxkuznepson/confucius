@@ -148,11 +148,16 @@ export function LoginPage() {
 
           {/* Test credentials hint */}
           <div className={`mt-4 p-3 rounded-xl text-xs ${darkMode ? 'bg-[#2A2018] text-[#E8D9A0]' : 'bg-white/70 text-gray-600'}`}>
-            <p className="font-medium mb-1">{lang === 'ru' ? 'Тестовые данные:' : '测试账号：'}</p>
-            <p>student1 / 123 — {lang === 'ru' ? 'Ученик (класс A-1)' : '学生（A-1班）'}</p>
-            <p>parent1 / 123 — {lang === 'ru' ? 'Родитель' : '家长'}</p>
-            <p>teacher1 / 123 — {lang === 'ru' ? 'Учитель' : '教师'}</p>
-            <p className="mt-1 opacity-70">{lang === 'ru' ? 'Всего: 60 учеников, 60 родителей, 10 учителей' : '共60名学生，60名家长，10名教师'}</p>
+            <p className="font-medium mb-1">{lang === 'ru' ? 'Тестовые данные (пароль: 123):' : '测试账号（密码：123）：'}</p>
+            <p className="font-medium mt-2 mb-1">{lang === 'ru' ? '📧 Email:' : '📧 邮箱：'}</p>
+            <p>student1@confucius.ru — {lang === 'ru' ? 'Ученик' : '学生'}</p>
+            <p>parent1@confucius.ru — {lang === 'ru' ? 'Родитель' : '家长'}</p>
+            <p>teacher1@confucius.ru — {lang === 'ru' ? 'Учитель' : '教师'}</p>
+            <p className="font-medium mt-2 mb-1">{lang === 'ru' ? '📱 Телефон:' : '📱 手机号：'}</p>
+            <p>+7-999-888-0001 — {lang === 'ru' ? 'Ученик' : '学生'}</p>
+            <p>+7-999-888-0003 — {lang === 'ru' ? 'Родитель' : '家长'}</p>
+            <p>+7-999-888-0100 — {lang === 'ru' ? 'Учитель' : '教师'}</p>
+            <p className="mt-2 opacity-70">{lang === 'ru' ? 'Всего: 60 учеников, 60 родителей, 10 учителей' : '共60名学生，60名家长，10名教师'}</p>
           </div>
         </form>
       </div>
