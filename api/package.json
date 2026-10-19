@@ -1,0 +1,30 @@
+{
+  "name": "confucius-api",
+  "version": "1.0.0",
+  "description": "REST API для мобильного приложения Школа Конфуция",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["confucius", "school", "api", "postgresql"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.25.0",
+    "@fastify/cors": "^8.5.0",
+    "@fastify/jwt": "^8.0.0",
+    "postgres": "^3.4.3",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/bcrypt": "^5.0.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

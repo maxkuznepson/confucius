@@ -11,7 +11,7 @@
 import { USE_MOCK } from '../config';
 import type { IApiService } from './api.types';
 import { MockApiService } from './MockApiService';
-import { SupabaseApiService } from './SupabaseApiService';
+import { RestApiService } from './RestApiService';
 
 // Singleton экземпляр API сервиса
 let apiInstance: IApiService | null = null;
@@ -25,8 +25,8 @@ export function getApiService(): IApiService {
       console.log('[API Factory] Using MockApiService');
       apiInstance = new MockApiService();
     } else {
-      console.log('[API Factory] Using SupabaseApiService');
-      apiInstance = new SupabaseApiService();
+      console.log('[API Factory] Using RestApiService');
+      apiInstance = new RestApiService();
     }
   }
   return apiInstance;
