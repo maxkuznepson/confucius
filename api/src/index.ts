@@ -15,13 +15,18 @@ dotenv.config();
 
 const fastify = Fastify({
   logger: {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
+    level: 'info',
+    // Красивые логи только если установлен pino-pretty
+    ...(process.env.NODE_ENV !== 'production' && {
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          translateTime: 'HH:MM:ss',
+          ignore: 'pid,hostname',
+          colorize: true,
+        },
       },
-    },
+    }),
   },
 });
 
