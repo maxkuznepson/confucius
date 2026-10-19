@@ -478,26 +478,7 @@ SELECT id, 'system'::notification_type_enum, 'Добро пожаловать!',
 FROM users
 WHERE username IN ('student1','student2','student3','student4','student5','parent1','parent2','parent3','teacher1','teacher2');
 
--- ---------- 18. БАЛЛЫ (для родителей) ----------
-DO $$
-DECLARE
-    parent_num INT;
-BEGIN
-    FOR parent_num IN 1..60 LOOP
-        INSERT INTO points_accounts (user_id, balance, total_earned)
-        VALUES (
-            ('d0000000-0000-0000-0000-' || lpad(parent_num::text, 12, '0'))::uuid,
-            100000 + (parent_num * 7777) % 400000,
-            500000 + (parent_num * 9999) % 500000
-        );
-        
-        INSERT INTO points_transactions (user_id, source, amount, description, created_at)
-        VALUES (
-            ('d0000000-0000-0000-0000-' || lpad(parent_num::text, 12, '0'))::uuid,
-            'purchase'::points_source_enum,
-            50000 + (parent_num * 3333) % 150000,
-            'Покупка курса',
-            '2025-01-15'
-        );
-    END LOOP;
-END $$;
+-- ---------- 18. БАЛЛЫ ----------
+-- Перенесены в 03_triggers_and_seed.sql (после создания триггеров
+-- users_create_points и points_apply_tx), чтобы автоматически
+-- корректно обновлялся balance.
