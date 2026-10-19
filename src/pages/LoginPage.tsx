@@ -70,7 +70,10 @@ export function LoginPage() {
                   type="radio"
                   name="method"
                   checked={method === 'phone'}
-                  onChange={() => setMethod('phone')}
+                  onChange={() => {
+                    setMethod('phone');
+                    setIdentifier(getDefaultPhone());
+                  }}
                   className="accent-red-600"
                 />
                 <span className="text-sm">{t('phone', lang)}</span>
@@ -80,7 +83,10 @@ export function LoginPage() {
                   type="radio"
                   name="method"
                   checked={method === 'email'}
-                  onChange={() => setMethod('email')}
+                  onChange={() => {
+                    setMethod('email');
+                    setIdentifier('');
+                  }}
                   className="accent-red-600"
                 />
                 <span className="text-sm">{t('email', lang)}</span>

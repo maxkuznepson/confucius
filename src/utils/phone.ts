@@ -4,39 +4,36 @@ export function formatPhone(value: string): string {
   // Убираем всё кроме цифр
   const digits = value.replace(/\D/g, '');
   
+  // Если пустая строка, возвращаем дефолт
+  if (digits.length === 0) {
+    return '+7-999-888-0002';
+  }
+  
   // Если начинается с 8, заменяем на 7
   let normalized = digits;
-  if (normalized.startsWith('8') && normalized.length > 0) {
+  if (normalized.startsWith('8')) {
     normalized = '7' + normalized.slice(1);
   }
   
   // Если не начинается с 7, добавляем 7
-  if (!normalized.startsWith('7') && normalized.length > 0) {
+  if (!normalized.startsWith('7')) {
     normalized = '7' + normalized;
   }
   
-  // Если пустая строка, возвращаем дефолт
-  if (normalized.length === 0) {
-    return '+7-999-888-0002';
-  }
+  // Ограничиваем до 11 цифр
+  normalized = normalized.slice(0, 11);
   
   // Форматируем: +7-NNN-NNN-NNNN
-  let result = '+';
+  let result = '+' + normalized.slice(0, 1);
   
-  // Первая цифра — 7
-  result += normalized.slice(0, 1);
-  
-  // Далее 3 цифры
   if (normalized.length > 1) {
     result += '-' + normalized.slice(1, 4);
   }
   
-  // Далее 3 цифры
   if (normalized.length > 4) {
     result += '-' + normalized.slice(4, 7);
   }
   
-  // Далее 4 цифры
   if (normalized.length > 7) {
     result += '-' + normalized.slice(7, 11);
   }

@@ -648,7 +648,7 @@ mockParents.forEach((parent, idx) => {
 // Helper: find user by credentials (username, email, or phone)
 export function authenticateUser(identifier: string, password: string): User | null {
   // Нормализуем телефон для сравнения (убираем всё кроме цифр)
-  const normalizedPhone = identifier.replace(/\D/g, '');
+  const normalizedInput = identifier.replace(/\D/g, '');
   
   const user = mockUsers.find(u => {
     // Проверка пароля
@@ -662,7 +662,20 @@ export function authenticateUser(identifier: string, password: string): User | n
     
     // Проверка по телефону (сравниваем нормализованные номера)
     const userPhone = u.phone.replace(/\D/g, '');
-    if (normalizedPhone && userPhone === normalizedPhone) return true;
+    
+    // Если введено 11 цифр - точное сравнение
+    if (normalizedInput.length === 11 && userPhone === normalizedInput) return true;
+    
+    // Если введено больше 11 цифр - берём последние 11
+    if (normalizedInput.length > 11) {
+      const last11 = normalizedInput.slice(-11);
+      if (userPhone === last11) return true;
+    }
+    
+    // Если введено меньше 11 цифр - проверяем окончание
+    if (normalizedInput.length > 0 && normalizedInput.length < 11) {
+      if (userPhone.endsWith(normalizedInput)) return true;
+    }
     
     return false;
   });
