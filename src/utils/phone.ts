@@ -1,21 +1,12 @@
 // Утилита для форматирования телефона в маску +7-NNN-NNN-NNNN
 
-export function formatPhone(value: string): string {
+// Форматирование для отображения: +79998880001 -> +7-999-888-0001
+export function formatPhoneDisplay(value: string): string {
   // Убираем всё кроме цифр
   const digits = value.replace(/\D/g, '');
   
-  // Если пустая строка, возвращаем дефолт
-  if (digits.length === 0) {
-    return '+7-999-888-0002';
-  }
-  
-  // Если начинается с 8, заменяем на 7
+  // Если не начинается с 7, добавляем
   let normalized = digits;
-  if (normalized.startsWith('8')) {
-    normalized = '7' + normalized.slice(1);
-  }
-  
-  // Если не начинается с 7, добавляем 7
   if (!normalized.startsWith('7')) {
     normalized = '7' + normalized;
   }
@@ -41,7 +32,30 @@ export function formatPhone(value: string): string {
   return result;
 }
 
-// Извлечь только цифры из отформатированного телефона
+// Обработка ввода для маски телефона
+// Принимает текущее значение и новое, возвращает отформатированное
+export function formatPhoneInput(currentValue: string, newValue: string): string {
+  // Извлекаем цифры из нового значения
+  let digits = newValue.replace(/\D/g, '');
+  
+  // Если пользователь пытается удалить +7, возвращаем дефолт
+  if (digits.length === 0) {
+    return '+7-999-888-0002';
+  }
+  
+  // Если не начинается с 7, добавляем
+  if (!digits.startsWith('7')) {
+    digits = '7' + digits;
+  }
+  
+  // Ограничиваем до 11 цифр
+  digits = digits.slice(0, 11);
+  
+  // Форматируем с дефисами
+  return formatPhoneDisplay(digits);
+}
+
+// Извлечь только цифры из телефона
 export function extractDigits(value: string): string {
   return value.replace(/\D/g, '');
 }
@@ -52,7 +66,12 @@ export function isValidPhone(value: string): boolean {
   return digits.length === 11 && digits.startsWith('7');
 }
 
-// Получить дефолтный телефон
+// Получить дефолтный телефон (для отображения)
 export function getDefaultPhone(): string {
   return '+7-999-888-0002';
+}
+
+// Получить дефолтный телефон (для хранения)
+export function getDefaultPhoneRaw(): string {
+  return '79998880002';
 }

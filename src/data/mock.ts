@@ -221,7 +221,7 @@ function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Генерация телефона по формуле
+// Генерация телефона по формуле (хранится без дефисов)
 function generatePhone(type: 'student1' | 'student2' | 'parent' | 'teacher', n: number): string {
   let lastFour: number;
   if (type === 'student1') {
@@ -233,7 +233,7 @@ function generatePhone(type: 'student1' | 'student2' | 'parent' | 'teacher', n: 
   } else {
     lastFour = 100 * n + 100;
   }
-  return `+7-999-888-${String(lastFour).padStart(4, '0')}`;
+  return `+7999888${String(lastFour).padStart(4, '0')}`;
 }
 
 // Генерация имени

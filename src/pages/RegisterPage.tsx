@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { TopAppBar } from '../components/TopAppBar';
-import { formatPhone, getDefaultPhone } from '../utils/phone';
+import { formatPhoneInput, getDefaultPhone } from '../utils/phone';
 
 export function RegisterPage() {
   const { lang, darkMode, navigateTo, goBack } = useApp();
@@ -122,7 +122,15 @@ export function RegisterPage() {
             <input
               type="tel"
               value={form.phone}
-              onChange={(e) => handleChange('phone', formatPhone(e.target.value))}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                const digits = newValue.replace(/\D/g, '');
+                if (digits.length < 1 || !digits.startsWith('7')) {
+                  handleChange('phone', getDefaultPhone());
+                } else {
+                  handleChange('phone', formatPhoneInput(form.phone, newValue));
+                }
+              }}
               placeholder={t('phonePlaceholder', lang)}
               className={`w-full px-4 py-3 rounded-xl border ${inputBg} focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
@@ -150,7 +158,19 @@ export function RegisterPage() {
             <input
               type="tel"
               value={form.referrerPhone}
-              onChange={(e) => handleChange('referrerPhone', e.target.value ? formatPhone(e.target.value) : '')}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (!newValue) {
+                  handleChange('referrerPhone', '');
+                } else {
+                  const digits = newValue.replace(/\D/g, '');
+                  if (digits.length < 1 || !digits.startsWith('7')) {
+                    handleChange('referrerPhone', '+7');
+                  } else {
+                    handleChange('referrerPhone', formatPhoneInput(form.referrerPhone, newValue));
+                  }
+                }
+              }}
               className={`w-full px-4 py-3 rounded-xl border ${inputBg} focus:outline-none focus:ring-2 focus:ring-red-500`}
             />
           </div>

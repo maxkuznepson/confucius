@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { Globe, Moon, Sun } from 'lucide-react';
-import { formatPhone, getDefaultPhone } from '../utils/phone';
+import { formatPhoneInput, getDefaultPhone } from '../utils/phone';
 
 export function LoginPage() {
   const { lang, setLang, darkMode, toggleDarkMode, login, navigateTo } = useApp();
@@ -104,7 +104,14 @@ export function LoginPage() {
               value={identifier}
               onChange={(e) => {
                 if (method === 'phone') {
-                  setIdentifier(formatPhone(e.target.value));
+                  const newValue = e.target.value;
+                  // Если пользователь пытается удалить +7, игнорируем
+                  const digits = newValue.replace(/\D/g, '');
+                  if (digits.length < 1 || !digits.startsWith('7')) {
+                    setIdentifier(getDefaultPhone());
+                  } else {
+                    setIdentifier(formatPhoneInput(identifier, newValue));
+                  }
                 } else {
                   setIdentifier(e.target.value);
                 }
@@ -163,6 +170,7 @@ export function LoginPage() {
             <p>+7-999-888-0001 — {lang === 'ru' ? 'Ученик' : '学生'}</p>
             <p>+7-999-888-0003 — {lang === 'ru' ? 'Родитель' : '家长'}</p>
             <p>+7-999-888-0100 — {lang === 'ru' ? 'Учитель' : '教师'}</p>
+            <p className="mt-1 opacity-60 italic">{lang === 'ru' ? 'Ввод: +7-999-888-0001' : '输入：+7-999-888-0001'}</p>
             <p className="mt-2 opacity-70">{lang === 'ru' ? 'Всего: 60 учеников, 60 родителей, 10 учителей' : '共60名学生，60名家长，10名教师'}</p>
           </div>
         </form>
