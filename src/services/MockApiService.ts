@@ -184,6 +184,33 @@ export class MockApiService implements IApiService {
     return mockStudents.filter(s => studentIds.includes(s.id));
   }
 
+  async getTeacherSchedule(teacherId: string, year?: number): Promise<CourseLesson[]> {
+    await delay();
+    const targetYear = year || new Date().getFullYear();
+    
+    // Получаем классы учителя через учеников
+    const studentIds = mockTeacherStudents
+      .filter(ts => ts.teacher_id === teacherId)
+      .map(ts => ts.student_id);
+    
+    const classIds = new Set<string>();
+    studentIds.forEach(studentId => {
+      const student = mockStudents.find(s => s.id === studentId);
+      if (student?.class_id) {
+        classIds.add(student.class_id);
+      }
+    });
+    
+    // Фильтруем уроки по классам учителя и году
+    return mockLessons.filter(lesson => {
+      if (!classIds.has(lesson.class_id)) return false;
+      const lessonDate = new Date(lesson.scheduled_at);
+      return lessonDate.getFullYear() === targetYear;
+    }).sort((a, b) => 
+      new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+    );
+  }
+
   // ---------- Contests & Events ----------
 
   async getContests(): Promise<Contest[]> {

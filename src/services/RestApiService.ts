@@ -237,6 +237,11 @@ export class RestApiService implements IApiService {
     return await apiRequest<(Student & { full_name: string })[]>('/teachers/me/students');
   }
 
+  async getTeacherSchedule(teacherId: string, year?: number): Promise<CourseLesson[]> {
+    const query = year ? `?year=${year}` : '';
+    return await apiRequest<CourseLesson[]>(`/teachers/me/schedule${query}`);
+  }
+
   // ---------- Contests & Events ----------
 
   async getContests(): Promise<Contest[]> {

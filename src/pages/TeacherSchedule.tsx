@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
-import { mockLessons, mockTeacherStudents, mockStudents, mockCourses } from '../data/mock';
+import { api } from '../services';
+import { mockLessons, mockTeacherStudents, mockStudents, mockCourses, CourseLesson } from '../data/mock';
+import { USE_MOCK } from '../config';
 import { ChevronLeft, ChevronRight, Calendar, ArrowLeft } from 'lucide-react';
 
 interface TeacherScheduleProps {
@@ -15,43 +17,52 @@ export function TeacherSchedule({ teacherId }: TeacherScheduleProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [lessons, setLessons] = useState<CourseLesson[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Получаем все классы учителя
-  const teacherClasses = useMemo(() => {
-    const studentIds = mockTeacherStudents
-      .filter(ts => ts.teacher_id === teacherId)
-      .map(ts => ts.student_id);
-    
-    const classes = new Set<string>();
-    studentIds.forEach(studentId => {
-      const student = mockStudents.find(s => s.id === studentId);
-      if (student?.class_id) {
-        classes.add(student.class_id);
+  // Загрузка уроков через API или MOCK
+  useEffect(() => {
+    const loadLessons = async () => {
+      setLoading(true);
+      try {
+        if (USE_MOCK) {
+          // MOCK режим — используем локальные данные
+          const teacherClasses = new Set<string>();
+          mockTeacherStudents
+            .filter(ts => ts.teacher_id === teacherId)
+            .forEach(ts => {
+              const student = mockStudents.find(s => s.id === ts.student_id);
+              if (student?.class_id) teacherClasses.add(student.class_id);
+            });
+          
+          const filteredLessons = mockLessons.filter(lesson => {
+            if (!teacherClasses.has(lesson.class_id)) return false;
+            const lessonDate = new Date(lesson.scheduled_at);
+            return lessonDate.getFullYear() === year;
+          });
+          setLessons(filteredLessons);
+        } else {
+          // API режим — получаем через REST API
+          const apiLessons = await api.getTeacherSchedule(teacherId, year);
+          setLessons(apiLessons);
+        }
+      } catch (error) {
+        console.error('Error loading teacher schedule:', error);
+      } finally {
+        setLoading(false);
       }
-    });
-    
-    return Array.from(classes);
-  }, [teacherId]);
+    };
 
-  // Получаем все уроки учителя на текущий год
-  const teacherLessons = useMemo(() => {
-    return mockLessons.filter(lesson => {
-      // Проверяем, что урок для класса учителя
-      if (!teacherClasses.includes(lesson.class_id)) return false;
-      
-      // Проверяем, что урок в текущем году
-      const lessonDate = new Date(lesson.scheduled_at);
-      return lessonDate.getFullYear() === year;
-    });
-  }, [teacherClasses, year]);
+    loadLessons();
+  }, [teacherId, year]);
 
   // Группируем уроки по датам
   const lessonsByDate = useMemo(() => {
-    const grouped: Record<string, typeof teacherLessons> = {};
-    teacherLessons.forEach(lesson => {
+    const grouped: Record<string, CourseLesson[]> = {};
+    lessons.forEach(lesson => {
       const dateKey = new Date(lesson.scheduled_at).toDateString();
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -59,7 +70,7 @@ export function TeacherSchedule({ teacherId }: TeacherScheduleProps) {
       grouped[dateKey].push(lesson);
     });
     return grouped;
-  }, [teacherLessons]);
+  }, [lessons]);
 
   // Уроки на выбранную дату
   const selectedDayLessons = useMemo(() => {
@@ -217,7 +228,7 @@ export function TeacherSchedule({ teacherId }: TeacherScheduleProps) {
               {monthNames[month]} {year}
             </h3>
             <p className="text-xs opacity-60">
-              {teacherLessons.length} {lang === 'ru' ? 'урок(ов) в году' : '节课/年'}
+              {lessons.length} {lang === 'ru' ? 'урок(ов) в году' : '节课/年'}
             </p>
           </div>
           

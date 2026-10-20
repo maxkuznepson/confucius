@@ -65,4 +65,37 @@ export default async function teacherRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  // ========== GET /teachers/me/schedule ==========
+  // Расписание уроков учителя на указанный год
+  fastify.get<{ Querystring: { year?: string } }>('/me/schedule', async (request, reply) => {
+    try {
+      const userId = request.user.id;
+      const year = request.query.year || new Date().getFullYear().toString();
+
+      // Получаем все уроки для классов, которые ведет учитель
+      const lessons = await sql`
+        SELECT DISTINCT cl.*
+        FROM course_lessons cl
+        JOIN classes c ON c.id = cl.class_id
+        JOIN students s ON s.class_id = c.id
+        JOIN teacher_students ts ON ts.student_id = s.id
+        JOIN teachers t ON t.id = ts.teacher_id
+        WHERE t.user_id = ${userId}
+          AND EXTRACT(YEAR FROM cl.scheduled_at) = ${year}::int
+        ORDER BY cl.scheduled_at ASC
+      `;
+
+      return {
+        success: true,
+        data: lessons,
+      };
+    } catch (error) {
+      console.error('Get teacher schedule error:', error);
+      return reply.status(500).send({
+        success: false,
+        error: 'Internal server error',
+      });
+    }
+  });
 }

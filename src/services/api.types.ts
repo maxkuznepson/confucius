@@ -81,6 +81,7 @@ export interface IApiService {
   // ---------- Teachers ----------
   getTeacherByUserId(userId: string): Promise<Teacher | null>;
   getTeacherStudents(teacherId: string): Promise<Student[]>;
+  getTeacherSchedule(teacherId: string, year?: number): Promise<CourseLesson[]>;
 
   // ---------- Contests & Events ----------
   getContests(): Promise<Contest[]>;
