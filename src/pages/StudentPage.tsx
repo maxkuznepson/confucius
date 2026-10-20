@@ -439,7 +439,7 @@ function GradesTab({ studentId }: { studentId: string }) {
       <section>
         <h3 className="text-sm font-bold mb-2 opacity-80">{t('classRank', lang)}</h3>
         <div className={`${cardBg} rounded-xl p-4 shadow-sm text-center`}>
-          <p className={`text-3xl font-bold ${darkMode ? 'text-[#E53935]' : 'text-[#D32F2F]'}`}>#3</p>
+          <p className="text-3xl font-bold" style={{ color: darkMode ? '#E53935' : '#D32F2F' }}>#3</p>
           <p className="text-xs opacity-60 mt-1">{lang === 'ru' ? 'из 15 учеников' : '共15名学生'}</p>
         </div>
       </section>
