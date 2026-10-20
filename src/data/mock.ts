@@ -332,7 +332,8 @@ const generateMockLessons = (): CourseLesson[] => {
   return lessons;
 };
 
-export const mockLessons: CourseLesson[] = generateMockLessons();
+// Уроки будут сгенерированы после создания курсов и записей
+export let mockLessons: CourseLesson[] = [];
 export const mockCourseEnrollments: CourseEnrollment[] = [];
 export const mockHomeworks: Homework[] = [];
 export const mockSubmissions: HomeworkSubmission[] = [];
@@ -549,12 +550,14 @@ mockStudents.forEach(student => {
   }
 });
 
-// Уроки генерируются функцией generateMockLessons() выше
+// Генерируем уроки после создания курсов и записей
+mockLessons = generateMockLessons();
 
-// Домашние задания
+// Домашние задания (привязаны к урокам октября 2026)
 let hwCounter = 1;
 mockCourses.slice(0, 2).forEach(course => {
   for (let i = 1; i <= 3; i++) {
+    const day = 12 + (i - 1) * 3; // 12, 15, 18 октября
     mockHomeworks.push({
       id: `hw-${hwCounter}`,
       course_id: course.id,
@@ -563,8 +566,8 @@ mockCourses.slice(0, 2).forEach(course => {
       description: `Выполнить задание по курсу "${course.title}"`,
       hw_type: randomChoice(['vocabulary', 'writing', 'practice', 'speaking']),
       max_score: 100,
-      published_at: `2025-01-${String(10 + i).padStart(2, '0')}T10:00:00`,
-      deadline_at: `2025-01-${String(20 + i).padStart(2, '0')}T23:59:00`,
+      published_at: `2026-10-${String(day).padStart(2, '0')}T10:00:00`,
+      deadline_at: `2026-10-${String(day + 2).padStart(2, '0')}T23:59:00`,
       allow_late: Math.random() > 0.5,
     });
     hwCounter++;
@@ -585,10 +588,10 @@ mockStudents.forEach(student => {
       student_id: student.id,
       subject: randomChoice(['Китайский язык', 'Математика']),
       grade_type: randomChoice(['lesson', 'monthly', 'semester']),
-      period_label: 'Январь 2025',
+      period_label: 'Октябрь 2026',
       score: parseFloat((Math.random() * 2 + 3).toFixed(1)),
       max_score: 5,
-      graded_at: `2025-01-${String(randomInt(1, 28)).padStart(2, '0')}`,
+      graded_at: `2026-10-${String(randomInt(12, 20)).padStart(2, '0')}`,
     });
   }
   
@@ -625,7 +628,7 @@ mockStudents.forEach(student => {
       homework_id: hw.id,
       student_id: student.id,
       status: status,
-      submitted_at: status !== 'pending' ? `2025-01-${String(randomInt(15, 25)).padStart(2, '0')}T18:00:00` : undefined,
+      submitted_at: status !== 'pending' ? `2026-10-${String(randomInt(12, 20)).padStart(2, '0')}T18:00:00` : undefined,
       score: status === 'graded' ? randomInt(60, 100) : undefined,
       correctness: status === 'graded' ? randomInt(60, 100) : undefined,
       time_spent_min: status !== 'pending' ? randomInt(15, 60) : undefined,
@@ -658,9 +661,9 @@ mockContests.push(
     description: 'Ежегодный конкурс каллиграфии',
     description_zh: '年度书法比赛',
     rules: 'Участники пишут иероглифы в течение 30 минут',
-    start_date: '2025-02-15',
-    end_date: '2025-02-15',
-    registration_deadline: '2025-02-10',
+    start_date: '2026-11-15',
+    end_date: '2026-11-15',
+    registration_deadline: '2026-11-10',
     status: 'open',
   },
   {
@@ -670,9 +673,9 @@ mockContests.push(
     description: 'Чтение стихов на китайском языке',
     description_zh: '中文诗歌朗诵',
     rules: 'Стихотворение наизусть, 2-3 минуты',
-    start_date: '2025-03-01',
-    end_date: '2025-03-01',
-    registration_deadline: '2025-02-25',
+    start_date: '2026-12-01',
+    end_date: '2026-12-01',
+    registration_deadline: '2026-11-25',
     status: 'open',
   }
 );
@@ -686,8 +689,8 @@ mockEvents.push(
     description: 'Приглашаем на день открытых дверей!',
     description_zh: '欢迎参加开放日！',
     event_type: 'open_day',
-    start_at: '2025-02-20T10:00:00',
-    end_at: '2025-02-20T16:00:00',
+    start_at: '2026-11-20T10:00:00',
+    end_at: '2026-11-20T16:00:00',
     location: 'Главный корпус',
     is_paid: false,
     price: 0,
@@ -700,8 +703,8 @@ mockEvents.push(
     description: 'Празднование Китайского нового года',
     description_zh: '庆祝中国新年',
     event_type: 'cultural',
-    start_at: '2025-01-29T18:00:00',
-    end_at: '2025-01-29T22:00:00',
+    start_at: '2027-01-29T18:00:00',
+    end_at: '2027-01-29T22:00:00',
     location: 'Актовый зал',
     is_paid: true,
     price: 500,
@@ -720,7 +723,7 @@ mockUsers.slice(0, 10).forEach((user, idx) => {
     body: 'Ваш аккаунт успешно создан',
     body_zh: '您的账户已成功创建',
     is_read: false,
-    created_at: '2025-01-20T10:00:00',
+    created_at: '2026-10-12T10:00:00',
   });
 });
 
@@ -739,7 +742,7 @@ mockParents.forEach((parent, idx) => {
     amount: randomInt(50000, 200000),
     description: 'Покупка курса',
     description_zh: '购买课程',
-    created_at: '2025-01-15',
+    created_at: '2026-09-15',
   });
 });
 
