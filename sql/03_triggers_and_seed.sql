@@ -428,21 +428,21 @@ BEGIN
         (('f0000000-0000-0000-0000-' || lpad(class_num::text, 12, '0'))::uuid,
          '10000000-0000-0000-0000-000000000001',
          ('a0000000-0000-0000-0000-' || lpad(1::text, 12, '0'))::uuid,
-         1, '10:00', '11:30', 'A-' || (100 + class_num), '2024-09-01', '2025-06-30');
+         1, '10:00', '11:30', 'A-' || (100 + class_num), '2026-09-01', '2027-06-30');
         
         -- Среда: Математика
         INSERT INTO schedule (class_id, course_id, teacher_id, weekday, start_time, end_time, room, valid_from, valid_to) VALUES
         (('f0000000-0000-0000-0000-' || lpad(class_num::text, 12, '0'))::uuid,
          '10000000-0000-0000-0000-000000000002',
          ('a0000000-0000-0000-0000-' || lpad(2::text, 12, '0'))::uuid,
-         3, '14:00', '15:30', 'B-' || (200 + class_num), '2024-09-01', '2025-06-30');
+         3, '14:00', '15:30', 'B-' || (200 + class_num), '2026-09-01', '2027-06-30');
         
         -- Пятница: Каллиграфия (доп. занятие)
         INSERT INTO schedule (class_id, course_id, teacher_id, weekday, start_time, end_time, room, valid_from, valid_to) VALUES
         (('f0000000-0000-0000-0000-' || lpad(class_num::text, 12, '0'))::uuid,
          '10000000-0000-0000-0000-000000000003',
          ('a0000000-0000-0000-0000-' || lpad(3::text, 12, '0'))::uuid,
-         5, '16:00', '16:30', 'C-' || (300 + class_num), '2024-09-01', '2025-06-30');
+         5, '16:00', '16:30', 'C-' || (300 + class_num), '2026-09-01', '2027-06-30');
     END LOOP;
 END $$;
 
@@ -466,10 +466,10 @@ INSERT INTO announcements (id, title_ru, title_zh, body_ru, body_zh, tags, targe
 
 -- ---------- 19. Экзамены (exams) ----------
 INSERT INTO exams (id, exam_type, title, exam_date, registration_deadline, status) VALUES
-('a1000000-0000-0000-0000-000000000001', 'monthly', 'Ежемесячный экзамен — Январь', '2025-01-31', '2025-01-28', 'completed'),
+('a1000000-0000-0000-0000-000000000001', 'monthly', 'Ежемесячный экзамен — Октябрь', '2026-10-31', '2026-10-28', 'completed'),
 ('a1000000-0000-0000-0000-000000000002', 'semester', 'Семестровый экзамен — Осень 2024', '2024-12-25', '2024-12-20', 'completed'),
-('a1000000-0000-0000-0000-000000000003', 'hsk', 'HSK Level 2', '2025-03-15', '2025-03-01', 'open'),
-('a1000000-0000-0000-0000-000000000004', 'yct', 'YCT Level 3', '2025-04-10', '2025-03-25', 'open');
+('a1000000-0000-0000-0000-000000000003', 'hsk', 'HSK Level 2', '2027-03-15', '2027-03-01', 'open'),
+('a1000000-0000-0000-0000-000000000004', 'yct', 'YCT Level 3', '2027-04-10', '2027-03-25', 'open');
 
 -- ---------- 20. Регистрации на экзамены (exam_registrations) ----------
 DO $$
@@ -662,7 +662,7 @@ BEGIN
         
         -- Транзакция 1: покупка курса
         INSERT INTO points_transactions (user_id, source, amount, description, created_at) VALUES
-        (parent_user_uuid, 'purchase'::points_source_enum, 50000 + (parent_num * 3333) % 150000, 'Покупка курса', '2025-01-15');
+        (parent_user_uuid, 'purchase'::points_source_enum, 50000 + (parent_num * 3333) % 150000, 'Покупка курса', '2026-09-15');
         
         -- Транзакция 2: реферал (для 50%)
         IF parent_num % 2 = 0 THEN
@@ -673,7 +673,7 @@ BEGIN
         -- Транзакция 3: бонус (для 30%)
         IF parent_num % 3 = 0 THEN
             INSERT INTO points_transactions (user_id, source, amount, description, created_at) VALUES
-            (parent_user_uuid, 'manual'::points_source_enum, 150000, 'Бонус за активность', '2025-01-20');
+            (parent_user_uuid, 'manual'::points_source_enum, 150000, 'Бонус за активность', '2026-10-20');
         END IF;
     END LOOP;
 END $$;
