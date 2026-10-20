@@ -89,10 +89,25 @@ function LearningTab({ studentId }: { studentId: string }) {
     enrolledCourseIds.includes(l.course_id)
   );
   
-  const now = new Date();
+  // Определяем "сегодня" на основе данных уроков
+  // Если есть урок со статусом 'live', используем его дату как "сегодня"
+  // Иначе используем дату ближайшего будущего урока
+  // Иначе используем реальную текущую дату
+  const liveLesson = studentLessons.find(l => l.live_status === 'live');
+  const nextUpcomingLesson = [...studentLessons]
+    .filter(l => l.live_status === 'upcoming')
+    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
+  
+  const simulatedToday = liveLesson 
+    ? new Date(liveLesson.scheduled_at)
+    : nextUpcomingLesson
+    ? new Date(nextUpcomingLesson.scheduled_at)
+    : new Date();
+  
+  // Уроки на "сегодня" (симулированную дату) или текущие
   const todayLessons = studentLessons.filter(l => {
     const d = new Date(l.scheduled_at);
-    return d.toDateString() === now.toDateString() || l.live_status === 'live';
+    return d.toDateString() === simulatedToday.toDateString() || l.live_status === 'live';
   });
   
   // Все уроки студента, отсортированные по дате
