@@ -65,13 +65,34 @@ export function StudentPage({ studentId }: { studentId: string }) {
 // =================== LEARNING TAB ===================
 function LearningTab({ studentId }: { studentId: string }) {
   const { lang, darkMode } = useApp();
+  const lessonsContainerRef = React.useRef<HTMLDivElement>(null);
+  const currentLessonRef = React.useRef<HTMLDivElement>(null);
+  
   const enrolledCourses = mockCourses.filter(c => !c.is_additional);
   const additionalCourses = mockCourses.filter(c => c.is_additional);
+  
+  const now = new Date();
   const todayLessons = mockLessons.filter(l => {
     const d = new Date(l.scheduled_at);
-    const today = new Date();
-    return d.toDateString() === today.toDateString() || l.live_status === 'live';
+    return d.toDateString() === now.toDateString() || l.live_status === 'live';
   });
+  
+  // Все уроки, отсортированные по дате
+  const allLessons = [...mockLessons].sort((a, b) => 
+    new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+  );
+  
+  // Автоматическая прокрутка к текущему или ближайшему будущему уроку
+  React.useEffect(() => {
+    if (currentLessonRef.current) {
+      setTimeout(() => {
+        currentLessonRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 300);
+    }
+  }, []);
 
   const pendingHw = mockHomeworks.filter(hw => {
     const sub = mockSubmissions.find(s => s.homework_id === hw.id && s.student_id === studentId);
@@ -81,6 +102,8 @@ function LearningTab({ studentId }: { studentId: string }) {
   const cardBg = darkMode ? 'bg-[#2A2018]' : 'bg-white';
   const goldBg = darkMode ? 'bg-[#4A3A1A]' : 'bg-[#FBC02D]';
   const goldText = darkMode ? 'text-[#E8D9A0]' : 'text-[#212121]';
+  const pastBg = darkMode ? 'bg-[#1A1410]/50' : 'bg-gray-100';
+  const pastText = darkMode ? 'text-[#E8D9A0]/40' : 'text-gray-400';
 
   return (
     <div className="space-y-4">
@@ -109,6 +132,58 @@ function LearningTab({ studentId }: { studentId: string }) {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Weekly Schedule */}
+      <section>
+        <h3 className="text-sm font-bold mb-2 opacity-80">{t('schedule', lang)}</h3>
+        <div ref={lessonsContainerRef} className="space-y-2 max-h-96 overflow-y-auto">
+          {allLessons.map(lesson => {
+            const lessonDate = new Date(lesson.scheduled_at);
+            const isPast = lesson.live_status === 'finished';
+            const isCurrent = lesson.live_status === 'live';
+            const isFuture = lesson.live_status === 'upcoming';
+            
+            // Определяем, является ли это текущим или ближайшим будущим уроком
+            const isTargetLesson = isCurrent || (isFuture && !currentLessonRef.current);
+            
+            return (
+              <div 
+                key={lesson.id}
+                ref={isTargetLesson && !currentLessonRef.current ? currentLessonRef : null}
+                className={`${
+                  isPast ? `${pastBg} ${pastText}` : 
+                  isCurrent ? `${goldBg} ${goldText}` :
+                  `${cardBg} ${darkMode ? 'text-[#F5E6D3]' : 'text-[#212121]'}`
+                } rounded-xl p-3 flex items-center justify-between transition-colors`}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className={`text-sm ${isPast ? 'font-normal' : 'font-medium'}`}>
+                      {lang === 'ru' ? lesson.title : lesson.title_zh}
+                    </p>
+                    {isPast && <span className="text-xs opacity-50">✓</span>}
+                  </div>
+                  <p className={`text-xs ${isPast ? 'opacity-50' : 'opacity-70'}`}>
+                    {lessonDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'zh-CN', { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })} • {lessonDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {lesson.room && ` • ${lesson.room}`}
+                  </p>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  isCurrent ? 'bg-red-500 text-white' :
+                  isFuture ? 'bg-green-500 text-white' : 
+                  'bg-gray-400 text-white'
+                }`}>
+                  {t(lesson.live_status, lang)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* Main Courses */}
