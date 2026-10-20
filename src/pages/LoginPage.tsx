@@ -186,6 +186,17 @@ export function LoginPage() {
             )}
           </div>
 
+          {/* Debug link */}
+          <div className="text-center mt-2">
+            <button
+              type="button"
+              onClick={() => navigateTo('/debug')}
+              className={`text-xs underline ${darkMode ? 'text-[#E8D9A0]/50' : 'text-gray-500'}`}
+            >
+              🔧 Debug Page
+            </button>
+          </div>
+
           {/* Test credentials hint */}
           <div className={`mt-4 p-3 rounded-xl text-xs ${darkMode ? 'bg-[#2A2018] text-[#E8D9A0]' : 'bg-white/70 text-gray-600'}`}>
             <p className="font-medium mb-1">{lang === 'ru' ? 'Тестовые данные (пароль: 123):' : '测试账号（密码：123）：'}</p>

@@ -5,6 +5,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { StudentPage } from './pages/StudentPage';
 import { ParentPage } from './pages/ParentPage';
 import { TeacherPage } from './pages/TeacherPage';
+import { DebugPage } from './pages/DebugPage';
 
 function Router() {
   const { currentPath } = useApp();
@@ -31,6 +32,10 @@ function Router() {
   if (currentPath.startsWith('/teacher/')) {
     const teacherId = currentPath.split('/teacher/')[1];
     return <TeacherPage teacherId={teacherId} />;
+  }
+
+  if (currentPath === '/debug') {
+    return <DebugPage />;
   }
 
   return <LoginPage />;

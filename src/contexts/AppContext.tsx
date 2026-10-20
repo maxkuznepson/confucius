@@ -44,10 +44,12 @@ function loadState<T>(key: string, defaultValue: T): T {
   try {
     const stored = localStorage.getItem(key);
     if (stored !== null) {
+      console.log(`[Storage] Загружено: ${key}`, JSON.parse(stored));
       return JSON.parse(stored);
     }
+    console.log(`[Storage] Не найдено: ${key}, используется значение по умолчанию`);
   } catch (e) {
-    console.warn(`Не удалось загрузить ${key} из localStorage`);
+    console.warn(`[Storage] Ошибка загрузки ${key}:`, e);
   }
   return defaultValue;
 }
@@ -56,8 +58,9 @@ function loadState<T>(key: string, defaultValue: T): T {
 function saveState<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    console.log(`[Storage] Сохранено: ${key}`, value);
   } catch (e) {
-    console.warn(`Не удалось сохранить ${key} в localStorage`);
+    console.warn(`[Storage] Ошибка сохранения ${key}:`, e);
   }
 }
 
@@ -119,11 +122,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<boolean> => {
+    console.log('[Login] Попытка входа:', username);
     try {
       const response = await api.login(username, password);
-      if (!response) return false;
+      if (!response) {
+        console.log('[Login] Неверные учетные данные');
+        return false;
+      }
 
       const { user, role, profile } = response;
+      console.log('[Login] Успешный вход:', { userId: user.id, role });
+      
       const student = role === 'student' ? (profile as Student) : null;
       const parent = role === 'parent' ? (profile as Parent) : null;
       const teacher = role === 'teacher' ? (profile as Teacher) : null;
@@ -137,6 +146,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       else if (role === 'parent' && parent) nextPath = `/parent/${parent.id}`;
       else if (role === 'teacher' && teacher) nextPath = `/teacher/${teacher.id}`;
 
+      console.log('[Login] Переход на:', nextPath);
       setCurrentPathState(nextPath);
       setHistory([nextPath]);
       saveState(STORAGE_KEYS.currentPath, nextPath);
@@ -150,6 +160,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    console.log('[Logout] Выход из системы');
     try {
       await api.logout();
     } catch (error) {
@@ -164,9 +175,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveState(STORAGE_KEYS.auth, emptyAuth);
     saveState(STORAGE_KEYS.currentPath, '/login');
     saveState(STORAGE_KEYS.history, ['/login']);
+    console.log('[Logout] Состояние очищено');
   }, []);
 
   const navigateTo = useCallback((path: string) => {
+    console.log('[Navigate] Переход на:', path);
     setCurrentPathState(path);
     setHistory(h => {
       const newHistory = [...h, path];
