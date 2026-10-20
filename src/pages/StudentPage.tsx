@@ -89,25 +89,13 @@ function LearningTab({ studentId }: { studentId: string }) {
     enrolledCourseIds.includes(l.course_id)
   );
   
-  // Определяем "сегодня" на основе данных уроков
-  // Если есть урок со статусом 'live', используем его дату как "сегодня"
-  // Иначе используем дату ближайшего будущего урока
-  // Иначе используем реальную текущую дату
-  const liveLesson = studentLessons.find(l => l.live_status === 'live');
-  const nextUpcomingLesson = [...studentLessons]
-    .filter(l => l.live_status === 'upcoming')
-    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
+  // Используем реальную текущую дату для определения "сегодня"
+  const today = new Date();
   
-  const simulatedToday = liveLesson 
-    ? new Date(liveLesson.scheduled_at)
-    : nextUpcomingLesson
-    ? new Date(nextUpcomingLesson.scheduled_at)
-    : new Date();
-  
-  // Уроки на "сегодня" (симулированную дату) или текущие
+  // Уроки на сегодня (реальная дата)
   const todayLessons = studentLessons.filter(l => {
     const d = new Date(l.scheduled_at);
-    return d.toDateString() === simulatedToday.toDateString() || l.live_status === 'live';
+    return d.toDateString() === today.toDateString();
   });
   
   // Все уроки студента, отсортированные по дате
@@ -117,7 +105,12 @@ function LearningTab({ studentId }: { studentId: string }) {
   
   // Автоматическая прокрутка к текущему или ближайшему будущему уроку
   React.useEffect(() => {
-    if (currentLessonRef.current) {
+    // Находим первый будущий или текущий урок
+    const targetLesson = allLessons.find(l => 
+      l.live_status === 'live' || l.live_status === 'upcoming'
+    );
+    
+    if (targetLesson && currentLessonRef.current) {
       setTimeout(() => {
         currentLessonRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
@@ -125,7 +118,7 @@ function LearningTab({ studentId }: { studentId: string }) {
         });
       }, 300);
     }
-  }, []);
+  }, [allLessons]);
 
   const pendingHw = mockHomeworks.filter(hw => {
     const sub = mockSubmissions.find(s => s.homework_id === hw.id && s.student_id === studentId);
@@ -177,13 +170,14 @@ function LearningTab({ studentId }: { studentId: string }) {
             const isCurrent = lesson.live_status === 'live';
             const isFuture = lesson.live_status === 'upcoming';
             
-            // Определяем, является ли это текущим или ближайшим будущим уроком
-            const isTargetLesson = isCurrent || (isFuture && !currentLessonRef.current);
+            // Определяем, является ли это текущим или ближайшим будущим уроком для прокрутки
+            const isFirstTargetLesson = (isCurrent || isFuture) && 
+              !allLessons.slice(0, allLessons.indexOf(lesson)).some(l => l.live_status === 'live' || l.live_status === 'upcoming');
             
             return (
               <div 
                 key={lesson.id}
-                ref={isTargetLesson && !currentLessonRef.current ? currentLessonRef : null}
+                ref={isFirstTargetLesson ? currentLessonRef : null}
                 className={`${
                   isPast ? `${pastBg} ${pastText}` : 
                   isCurrent ? `${goldBg} ${goldText}` :
