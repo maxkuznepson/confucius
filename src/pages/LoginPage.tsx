@@ -3,6 +3,7 @@ import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { Globe, Moon, Sun } from 'lucide-react';
 import { formatPhoneInput, getDefaultPhone } from '../utils/phone';
+import { ConfuciusLogo } from '../components/ConfuciusLogo';
 
 export function LoginPage() {
   const { lang, setLang, darkMode, toggleDarkMode, login, navigateTo } = useApp();
@@ -55,7 +56,7 @@ export function LoginPage() {
         {/* Logo / Title */}
         <div className="mb-8 text-center">
           <div className={`w-20 h-20 mx-auto mb-4 rounded-full ${cardClass} flex items-center justify-center shadow-lg overflow-hidden`}>
-            <img src="/images/logo.jpg" alt="Логотип" className="w-full h-full object-cover" />
+            <ConfuciusLogo size={80} />
           </div>
           <h1 className="text-2xl font-bold">{t('login', lang)}</h1>
           <p className={`text-sm mt-1 ${darkMode ? 'text-[#E8D9A0]' : 'text-gray-600'}`}>
