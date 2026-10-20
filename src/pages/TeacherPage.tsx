@@ -3,9 +3,10 @@ import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { TopAppBar } from '../components/TopAppBar';
 import { mockStudents, mockUsers, mockAttendance, mockLessons, mockGrades, mockTeacherStudents, mockCourses } from '../data/mock';
-import { Users, Star, ClipboardList, GraduationCap } from 'lucide-react';
+import { Users, Star, ClipboardList, GraduationCap, Calendar } from 'lucide-react';
+import { TeacherSchedule } from './TeacherSchedule';
 
-type TeacherTab = 'attendance' | 'grades' | 'exams' | 'students';
+type TeacherTab = 'attendance' | 'grades' | 'exams' | 'students' | 'schedule';
 
 export function TeacherPage({ teacherId }: { teacherId: string }) {
   const { lang, darkMode } = useApp();
@@ -19,6 +20,7 @@ export function TeacherPage({ teacherId }: { teacherId: string }) {
     { key: 'grades', icon: <Star size={16} />, label: t('gradeStudents', lang) },
     { key: 'exams', icon: <GraduationCap size={16} />, label: t('manageExams', lang) },
     { key: 'students', icon: <Users size={16} />, label: t('studentManagement', lang) },
+    { key: 'schedule', icon: <Calendar size={16} />, label: t('schedule', lang) },
   ];
 
   return (
@@ -51,6 +53,7 @@ export function TeacherPage({ teacherId }: { teacherId: string }) {
         {activeTab === 'grades' && <GradesTab teacherId={teacherId} />}
         {activeTab === 'exams' && <ExamsTab />}
         {activeTab === 'students' && <StudentsTab teacherId={teacherId} />}
+        {activeTab === 'schedule' && <TeacherSchedule teacherId={teacherId} />}
       </div>
     </div>
   );
