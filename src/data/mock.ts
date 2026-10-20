@@ -265,7 +265,64 @@ export const mockTeachers: Teacher[] = [];
 export const mockParentStudents: ParentStudent[] = [];
 export const mockTeacherStudents: TeacherStudent[] = [];
 export const mockCourses: Course[] = [];
-export const mockLessons: CourseLesson[] = [];
+// Генерация уроков для периода 12-30 октября 2026
+// Один урок в день на каждый класс
+const generateMockLessons = (): CourseLesson[] => {
+  const lessons: CourseLesson[] = [];
+  const classes: Array<{id: string; name: string; course_id: 'crs-1' | 'crs-2' | 'crs-3'; room: string; time: string}> = [
+    { id: 'class-1', name: 'A-1', course_id: 'crs-1', room: 'А-101', time: '09:00' },
+    { id: 'class-2', name: 'A-2', course_id: 'crs-1', room: 'А-102', time: '10:00' },
+    { id: 'class-3', name: 'B-1', course_id: 'crs-2', room: 'Б-201', time: '11:00' },
+    { id: 'class-4', name: 'B-2', course_id: 'crs-2', room: 'Б-202', time: '12:00' },
+    { id: 'class-5', name: 'C-1', course_id: 'crs-3', room: 'В-301', time: '14:00' },
+    { id: 'class-6', name: 'C-2', course_id: 'crs-3', room: 'В-302', time: '15:00' },
+  ];
+  
+  const lessonTitles = {
+    'crs-1': {
+      ru: ['Приветствия', 'Числа', 'Семья', 'Еда', 'Цвета', 'Животные', 'Школа', 'Дом', 'Погода', 'Время', 'Транспорт', 'Одежда', 'Тело', 'Эмоции', 'Хобби', 'Спорт', 'Музыка', 'Путешествия', 'Работа'],
+      zh: ['问候', '数字', '家庭', '食物', '颜色', '动物', '学校', '家', '天气', '时间', '交通', '衣服', '身体', '情绪', '爱好', '运动', '音乐', '旅行', '工作']
+    },
+    'crs-2': {
+      ru: ['Арифметика', 'Геометрия', 'Алгебра', 'Задачи', 'Уравнения', 'Дроби', 'Проценты', 'Графики', 'Статистика', 'Вероятность', 'Логика', 'Площади', 'Объёмы', 'Координаты', 'Функции', 'Пропорции', 'Степени', 'Корни', 'Множества'],
+      zh: ['算术', '几何', '代数', '问题', '方程', '分数', '百分比', '图表', '统计', '概率', '逻辑', '面积', '体积', '坐标', '函数', '比例', '幂', '根', '集合']
+    },
+    'crs-3': {
+      ru: ['Иероглифы', 'Штрихи', 'Компоненты', 'Практика', 'Сочинение', 'Каллиграфия', 'Письмо', 'Чтение', 'Диктант', 'Творчество', 'История', 'Культура', 'Искусство', 'Философия', 'Поэзия', 'Литература', 'Театр', 'Музыка', 'Танцы'],
+      zh: ['汉字', '笔画', '组件', '练习', '作文', '书法', '写作', '阅读', '听写', '创作', '历史', '文化', '艺术', '哲学', '诗歌', '文学', '戏剧', '音乐', '舞蹈']
+    }
+  };
+  
+  let lessonId = 1;
+  
+  // Период: 12-30 октября 2026 (19 дней)
+  for (let day = 12; day <= 30; day++) {
+    const date = `2026-10-${day.toString().padStart(2, '0')}`;
+    const dayIndex = day - 12; // 0-18
+    
+    classes.forEach((classInfo, classIndex) => {
+      const titleIndex = dayIndex % lessonTitles[classInfo.course_id].ru.length;
+      
+      lessons.push({
+        id: `l-${lessonId}`,
+        course_id: classInfo.course_id,
+        title: `Урок ${dayIndex + 1}: ${lessonTitles[classInfo.course_id].ru[titleIndex]}`,
+        title_zh: `第${dayIndex + 1}课：${lessonTitles[classInfo.course_id].zh[titleIndex]}`,
+        lesson_order: dayIndex + 1,
+        scheduled_at: `${date}T${classInfo.time}:00`,
+        duration_min: classInfo.course_id === 'crs-3' ? 30 : 45,
+        room: classInfo.room,
+        live_status: day < 20 ? 'finished' : day === 20 ? 'live' : 'upcoming',
+      });
+      
+      lessonId++;
+    });
+  }
+  
+  return lessons;
+};
+
+export const mockLessons: CourseLesson[] = generateMockLessons();
 export const mockHomeworks: Homework[] = [];
 export const mockSubmissions: HomeworkSubmission[] = [];
 export const mockGrades: Grade[] = [];
