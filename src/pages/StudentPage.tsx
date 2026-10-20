@@ -84,9 +84,10 @@ function LearningTab({ studentId }: { studentId: string }) {
     c.is_additional && enrolledCourseIds.includes(c.id)
   );
   
-  // Уроки только для курсов студента
+  // Уроки только для курсов и класса студента
   const studentLessons = mockLessons.filter(l => 
-    enrolledCourseIds.includes(l.course_id)
+    enrolledCourseIds.includes(l.course_id) && 
+    l.class_id === studentClassId
   );
   
   // Используем реальную текущую дату для определения "сегодня"

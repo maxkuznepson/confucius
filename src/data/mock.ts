@@ -66,6 +66,7 @@ export interface Course {
 export interface CourseLesson {
   id: string;
   course_id: string;
+  class_id: string;  // Привязка к классу
   title: string;
   title_zh: string;
   lesson_order: number;
@@ -316,6 +317,7 @@ const generateMockLessons = (): CourseLesson[] => {
       lessons.push({
         id: `l-${lessonId}`,
         course_id: classInfo.course_id,
+        class_id: classInfo.id,  // Привязка к классу
         title: `Урок ${dayIndex + 1}: ${lessonTitles[classInfo.course_id].ru[titleIndex]}`,
         title_zh: `第${dayIndex + 1}课：${lessonTitles[classInfo.course_id].zh[titleIndex]}`,
         lesson_order: dayIndex + 1,

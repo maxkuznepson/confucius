@@ -72,6 +72,21 @@ export default async function studentRoutes(fastify: FastifyInstance) {
     try {
       const userId = request.user.id;
 
+      // Получаем class_id студента
+      const studentData = await sql<{ class_id: string }[]>`
+        SELECT class_id FROM students WHERE user_id = ${userId}
+      `;
+
+      if (studentData.length === 0) {
+        return reply.status(404).send({
+          success: false,
+          error: 'Student not found',
+        });
+      }
+
+      const studentClassId = studentData[0].class_id;
+
+      // Получаем уроки только для курсов студента И его класса
       const lessons = await sql<CourseLesson[]>`
         SELECT DISTINCT cl.*
         FROM course_lessons cl
@@ -79,6 +94,7 @@ export default async function studentRoutes(fastify: FastifyInstance) {
         JOIN course_enrollments ce ON ce.course_id = c.id
         JOIN students s ON s.id = ce.student_id
         WHERE s.user_id = ${userId}
+          AND cl.class_id = ${studentClassId}
         ORDER BY cl.scheduled_at DESC
         LIMIT 50
       `;

@@ -67,6 +67,7 @@ export interface Course {
 export interface CourseLesson {
   id: string;
   course_id: string;
+  class_id: string;  // Привязка к классу
   title: string;
   title_zh: string | null;
   lesson_order: number;
