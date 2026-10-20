@@ -5,24 +5,31 @@ dotenv.config();
 
 // Конфигурация подключения к PostgreSQL
 const dbConfig = {
-  host: process.env.DATABASE_HOST || 'localhost',
+  host: process.env.DATABASE_HOST || '127.0.0.1',
   port: parseInt(process.env.DATABASE_PORT || '5432'),
   database: process.env.DATABASE_NAME || 'confucius_school',
   username: process.env.DATABASE_USER || 'postgres',
-  password: process.env.DATABASE_PASSWORD || 'postgres',
+  password: process.env.DATABASE_PASSWORD || '', // Пустая строка = без пароля
 };
 
 // Создаём подключение через postgres.js
-export const sql = postgres({
+// Если пароль пустой — не передаём его (локальный доступ без пароля)
+const connectionConfig: any = {
   host: dbConfig.host,
   port: dbConfig.port,
   database: dbConfig.database,
   username: dbConfig.username,
-  password: dbConfig.password,
   max: 10, // Максимум подключений в пуле
   idle_timeout: 20,
   connect_timeout: 10,
-});
+};
+
+// Добавляем пароль только если он задан
+if (dbConfig.password) {
+  connectionConfig.password = dbConfig.password;
+}
+
+export const sql = postgres(connectionConfig);
 
 // Тест подключения
 export async function testConnection(): Promise<void> {
@@ -31,6 +38,8 @@ export async function testConnection(): Promise<void> {
     console.log('✅ PostgreSQL подключён успешно');
     console.log(`   Host: ${dbConfig.host}:${dbConfig.port}`);
     console.log(`   Database: ${dbConfig.database}`);
+    console.log(`   User: ${dbConfig.username}`);
+    console.log(`   Password: ${dbConfig.password ? '***' : '(без пароля)'}`);
   } catch (error) {
     console.error('❌ Ошибка подключения к PostgreSQL:', error);
     throw error;
