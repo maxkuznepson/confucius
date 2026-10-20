@@ -50,9 +50,9 @@ export const translations = {
   // Teacher
   teacher: { ru: 'Учитель', zh: '教师' },
   attendance: { ru: 'Посещаемость', zh: '出勤' },
-  gradeStudents: { ru: 'Оценки учеников', zh: '学生评分' },
-  manageExams: { ru: 'Управление экзаменами', zh: '考试管理' },
-  studentManagement: { ru: 'Управление учениками', zh: '学生管理' },
+  gradeStudents: { ru: 'Оценки', zh: '评分' },
+  manageExams: { ru: 'Экзамены', zh: '考试' },
+  studentManagement: { ru: 'Ученики', zh: '学生' },
 
   // Common
   today: { ru: 'Сегодня', zh: '今天' },

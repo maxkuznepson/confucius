@@ -18,9 +18,9 @@ export function TeacherPage({ teacherId }: { teacherId: string }) {
   const tabs: { key: TeacherTab; icon: React.ReactNode; label: string }[] = [
     { key: 'attendance', icon: <ClipboardList size={16} />, label: t('attendance', lang) },
     { key: 'grades', icon: <Star size={16} />, label: t('gradeStudents', lang) },
+    { key: 'schedule', icon: <Calendar size={16} />, label: t('schedule', lang) },
     { key: 'exams', icon: <GraduationCap size={16} />, label: t('manageExams', lang) },
     { key: 'students', icon: <Users size={16} />, label: t('studentManagement', lang) },
-    { key: 'schedule', icon: <Calendar size={16} />, label: t('schedule', lang) },
   ];
 
   return (
