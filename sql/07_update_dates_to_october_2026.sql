@@ -1,25 +1,25 @@
 -- ============================================================================
 -- 07_update_dates_to_october_2026.sql — Обновление всех дат на октябрь 2026
--- Этот скрипт обновляет все даты в базе данных для синхронизации с mock.ts
+-- Исправленная версия с явным приведением типов TIMESTAMPTZ
 -- ============================================================================
 
 -- Обновляем даты домашних заданий на октябрь 2026
 UPDATE homeworks
 SET published_at = CASE
-    WHEN id = '30000000-0000-0000-0000-000000000001' THEN '2026-10-12 10:00:00'
-    WHEN id = '30000000-0000-0000-0000-000000000002' THEN '2026-10-15 10:00:00'
-    WHEN id = '30000000-0000-0000-0000-000000000003' THEN '2026-10-18 10:00:00'
-    WHEN id = '30000000-0000-0000-0000-000000000004' THEN '2026-10-12 10:00:00'
-    WHEN id = '30000000-0000-0000-0000-000000000005' THEN '2026-10-15 10:00:00'
-    WHEN id = '30000000-0000-0000-0000-000000000006' THEN '2026-10-18 10:00:00'
+    WHEN id = '30000000-0000-0000-0000-000000000001' THEN '2026-10-12 10:00:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000002' THEN '2026-10-15 10:00:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000003' THEN '2026-10-18 10:00:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000004' THEN '2026-10-12 10:00:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000005' THEN '2026-10-15 10:00:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000006' THEN '2026-10-18 10:00:00'::timestamptz
 END,
 deadline_at = CASE
-    WHEN id = '30000000-0000-0000-0000-000000000001' THEN '2026-10-14 23:59:00'
-    WHEN id = '30000000-0000-0000-0000-000000000002' THEN '2026-10-17 23:59:00'
-    WHEN id = '30000000-0000-0000-0000-000000000003' THEN '2026-10-20 23:59:00'
-    WHEN id = '30000000-0000-0000-0000-000000000004' THEN '2026-10-14 23:59:00'
-    WHEN id = '30000000-0000-0000-0000-000000000005' THEN '2026-10-17 23:59:00'
-    WHEN id = '30000000-0000-0000-0000-000000000006' THEN '2026-10-20 23:59:00'
+    WHEN id = '30000000-0000-0000-0000-000000000001' THEN '2026-10-14 23:59:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000002' THEN '2026-10-17 23:59:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000003' THEN '2026-10-20 23:59:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000004' THEN '2026-10-14 23:59:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000005' THEN '2026-10-17 23:59:00'::timestamptz
+    WHEN id = '30000000-0000-0000-0000-000000000006' THEN '2026-10-20 23:59:00'::timestamptz
 END
 WHERE id IN (
     '30000000-0000-0000-0000-000000000001',
@@ -32,23 +32,23 @@ WHERE id IN (
 
 -- Обновляем даты оценок на октябрь 2026
 UPDATE grades
-SET graded_at = '2026-10-' || lpad((12 + (id % 9))::text, 2, '0')
-WHERE graded_at LIKE '2025-%';
+SET graded_at = ('2026-10-' || lpad((12 + (abs(hashtext(id::text)) % 9))::text, 2, '0'))::timestamptz
+WHERE graded_at < '2026-01-01'::timestamptz;
 
 -- Обновляем даты посещаемости на октябрь 2026
 UPDATE attendance
-SET marked_at = '2026-10-' || lpad((12 + (id % 9))::text, 2, '0')
-WHERE marked_at LIKE '2025-%';
+SET marked_at = ('2026-10-' || lpad((12 + (abs(hashtext(id::text)) % 9))::text, 2, '0'))::timestamptz
+WHERE marked_at < '2026-01-01'::timestamptz;
 
 -- Обновляем даты рейтингов уроков на октябрь 2026
 UPDATE lesson_ratings
-SET rated_at = '2026-10-' || lpad((12 + (id % 9))::text, 2, '0')
-WHERE rated_at LIKE '2025-%';
+SET rated_at = ('2026-10-' || lpad((12 + (abs(hashtext(id::text)) % 9))::text, 2, '0'))::timestamptz
+WHERE rated_at < '2026-01-01'::timestamptz;
 
 -- Обновляем даты отправок домашних заданий на октябрь 2026
 UPDATE homework_submissions
-SET submitted_at = '2026-10-' || lpad((12 + (id % 9))::text, 2, '0') || ' 18:00:00'
-WHERE submitted_at IS NOT NULL AND submitted_at::text LIKE '2025-%';
+SET submitted_at = ('2026-10-' || lpad((12 + (abs(hashtext(id::text)) % 9))::text, 2, '0') || ' 18:00:00')::timestamptz
+WHERE submitted_at IS NOT NULL AND submitted_at < '2026-01-01'::timestamptz;
 
 -- Обновляем даты конкурсов
 UPDATE contests
@@ -65,19 +65,19 @@ WHERE id = '50000000-0000-0000-0000-000000000002';
 
 -- Обновляем даты мероприятий
 UPDATE events
-SET start_at = '2026-11-20 10:00:00',
-    end_at = '2026-11-20 16:00:00'
+SET start_at = '2026-11-20 10:00:00'::timestamptz,
+    end_at = '2026-11-20 16:00:00'::timestamptz
 WHERE id = '60000000-0000-0000-0000-000000000001';
 
 UPDATE events
-SET start_at = '2027-01-29 18:00:00',
-    end_at = '2027-01-29 22:00:00'
+SET start_at = '2027-01-29 18:00:00'::timestamptz,
+    end_at = '2027-01-29 22:00:00'::timestamptz
 WHERE id = '60000000-0000-0000-0000-000000000002';
 
 -- Обновляем даты уведомлений
 UPDATE notifications
-SET created_at = '2026-10-12 10:00:00'
-WHERE created_at LIKE '2025-%';
+SET created_at = '2026-10-12 10:00:00'::timestamptz
+WHERE created_at < '2026-01-01'::timestamptz;
 
 -- Обновляем даты экзаменов
 UPDATE exams
@@ -103,12 +103,12 @@ WHERE valid_to = '2025-06-30';
 
 -- Обновляем даты транзакций баллов
 UPDATE points_transactions
-SET created_at = '2026-09-15'
-WHERE created_at = '2025-01-15';
+SET created_at = '2026-09-15'::timestamptz
+WHERE created_at = '2025-01-15'::timestamptz;
 
 UPDATE points_transactions
-SET created_at = '2026-10-20'
-WHERE created_at = '2025-01-20';
+SET created_at = '2026-10-20'::timestamptz
+WHERE created_at = '2025-01-20'::timestamptz;
 
 -- Проверка результата
 SELECT 'homeworks' as table_name, COUNT(*) as count, MIN(published_at) as min_date, MAX(published_at) as max_date FROM homeworks
