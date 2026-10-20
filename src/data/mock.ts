@@ -75,6 +75,16 @@ export interface CourseLesson {
   live_status: 'upcoming' | 'live' | 'finished';
 }
 
+export interface CourseEnrollment {
+  id: string;
+  course_id: string;
+  student_id: string;
+  enrolled_at: string;
+  progress_pct: number;
+  contract_signed: boolean;
+  paid: boolean;
+}
+
 export interface Homework {
   id: string;
   course_id: string;
@@ -323,6 +333,7 @@ const generateMockLessons = (): CourseLesson[] => {
 };
 
 export const mockLessons: CourseLesson[] = generateMockLessons();
+export const mockCourseEnrollments: CourseEnrollment[] = [];
 export const mockHomeworks: Homework[] = [];
 export const mockSubmissions: HomeworkSubmission[] = [];
 export const mockGrades: Grade[] = [];
@@ -490,25 +501,55 @@ courseData.forEach((c, idx) => {
   });
 });
 
-// Уроки
-let lessonCounter = 1;
-mockCourses.forEach(course => {
-  for (let i = 1; i <= 5; i++) {
-    const status = i <= 3 ? 'finished' : i === 4 ? 'live' : 'upcoming';
-    mockLessons.push({
-      id: `l-${lessonCounter}`,
-      course_id: course.id,
-      title: `Урок ${i}`,
-      title_zh: `第${i}课`,
-      lesson_order: i,
-      scheduled_at: `2025-01-${String(15 + i).padStart(2, '0')}T${String(9 + i).padStart(2, '0')}:00:00`,
-      duration_min: randomInt(30, 60),
-      room: `${String.fromCharCode(65 + (lessonCounter % 3))}-${randomInt(100, 399)}`,
-      live_status: status as any,
+// Записи на курсы для всех студентов
+let enrollmentCounter = 1;
+mockStudents.forEach(student => {
+  // Все студенты записаны на основные курсы (crs-1 и crs-2)
+  mockCourseEnrollments.push({
+    id: `enr-${enrollmentCounter++}`,
+    course_id: 'crs-1',
+    student_id: student.id,
+    enrolled_at: '2024-09-01',
+    progress_pct: randomInt(30, 80),
+    contract_signed: true,
+    paid: true,
+  });
+  mockCourseEnrollments.push({
+    id: `enr-${enrollmentCounter++}`,
+    course_id: 'crs-2',
+    student_id: student.id,
+    enrolled_at: '2024-09-01',
+    progress_pct: randomInt(20, 70),
+    contract_signed: true,
+    paid: true,
+  });
+  
+  // 50% студентов записаны на дополнительные курсы
+  if (Math.random() > 0.5) {
+    mockCourseEnrollments.push({
+      id: `enr-${enrollmentCounter++}`,
+      course_id: 'crs-3',
+      student_id: student.id,
+      enrolled_at: '2024-09-15',
+      progress_pct: randomInt(10, 60),
+      contract_signed: false,
+      paid: false,
     });
-    lessonCounter++;
+  }
+  if (Math.random() > 0.7) {
+    mockCourseEnrollments.push({
+      id: `enr-${enrollmentCounter++}`,
+      course_id: 'crs-4',
+      student_id: student.id,
+      enrolled_at: '2024-09-15',
+      progress_pct: randomInt(10, 50),
+      contract_signed: false,
+      paid: false,
+    });
   }
 });
+
+// Уроки генерируются функцией generateMockLessons() выше
 
 // Домашние задания
 let hwCounter = 1;

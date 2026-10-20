@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { t } from '../i18n/translations';
 import { TopAppBar } from '../components/TopAppBar';
-import { mockCourses, mockLessons, mockHomeworks, mockSubmissions, mockGrades, mockLessonRatings, mockAchievements, mockContests, mockEvents, mockAttendance } from '../data/mock';
+import { mockCourses, mockLessons, mockHomeworks, mockSubmissions, mockGrades, mockLessonRatings, mockAchievements, mockContests, mockEvents, mockAttendance, mockStudents, mockCourseEnrollments } from '../data/mock';
 import { BookOpen, ClipboardList, Star, GraduationCap, Trophy, Calendar, Award, ChevronRight, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
 type StudentTab = 'learning' | 'homework' | 'grades' | 'courses' | 'contests' | 'events' | 'achievements';
@@ -68,17 +68,35 @@ function LearningTab({ studentId }: { studentId: string }) {
   const lessonsContainerRef = React.useRef<HTMLDivElement>(null);
   const currentLessonRef = React.useRef<HTMLDivElement>(null);
   
-  const enrolledCourses = mockCourses.filter(c => !c.is_additional);
-  const additionalCourses = mockCourses.filter(c => c.is_additional);
+  // Получаем информацию о студенте
+  const student = mockStudents.find(s => s.id === studentId);
+  const studentClassId = student?.class_id;
+  
+  // Курсы, на которые записан студент
+  const enrolledCourseIds = mockCourseEnrollments
+    .filter(e => e.student_id === studentId)
+    .map(e => e.course_id);
+  
+  const enrolledCourses = mockCourses.filter(c => 
+    !c.is_additional && enrolledCourseIds.includes(c.id)
+  );
+  const additionalCourses = mockCourses.filter(c => 
+    c.is_additional && enrolledCourseIds.includes(c.id)
+  );
+  
+  // Уроки только для курсов студента
+  const studentLessons = mockLessons.filter(l => 
+    enrolledCourseIds.includes(l.course_id)
+  );
   
   const now = new Date();
-  const todayLessons = mockLessons.filter(l => {
+  const todayLessons = studentLessons.filter(l => {
     const d = new Date(l.scheduled_at);
     return d.toDateString() === now.toDateString() || l.live_status === 'live';
   });
   
-  // Все уроки, отсортированные по дате
-  const allLessons = [...mockLessons].sort((a, b) => 
+  // Все уроки студента, отсортированные по дате
+  const allLessons = [...studentLessons].sort((a, b) => 
     new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
   );
   
