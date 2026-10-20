@@ -68,6 +68,7 @@ export interface CourseLesson {
   id: string;
   course_id: string;
   title: string;
+  title_zh: string | null;
   lesson_order: number;
   scheduled_at: string;
   duration_min: number;

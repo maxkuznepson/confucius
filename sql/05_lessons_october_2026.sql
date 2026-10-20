@@ -4,6 +4,10 @@
 -- Период: 12-30 октября 2026 (19 дней)
 -- ============================================================================
 
+-- Миграция: добавляем поле title_zh, если его нет
+ALTER TABLE course_lessons 
+ADD COLUMN IF NOT EXISTS title_zh VARCHAR(255);
+
 -- Удаляем старые уроки
 DELETE FROM course_lessons;
 
