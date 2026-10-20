@@ -8,5 +8,12 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    strictPort: true,
+    // Важно для HMR и загрузки модулей
+    hmr: {
+      port: 5173,
+    },
   },
+  // Базовый путь для приложения
+  base: '/',
 });
