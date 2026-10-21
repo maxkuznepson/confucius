@@ -22,7 +22,7 @@ export function BuildFixPage() {
     });
   };
 
-  const rootBuildGradle = `// android/build.gradle
+  const rootBuildGradleCorrect = `// android/build.gradle — ПРАВИЛЬНАЯ ВЕРСИЯ
 
 buildscript {
     ext {
@@ -33,7 +33,7 @@ buildscript {
         ndkVersion = "25.1.8937393"
         kotlinVersion = "1.9.22"
         
-        // AndroidX dependencies
+        // Переменные для зависимостей (используются в app/build.gradle)
         androidxAppCompatVersion = "1.6.1"
         androidxSwiperefreshlayoutVersion = "1.1.0"
     }
@@ -42,9 +42,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
-        classpath("com.facebook.react:gradle")
+        // ⚠️ В buildscript.dependencies ТОЛЬКО classpath!
+        classpath("com.android.tools.build:gradle:8.1.1")
+        classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:\${project.ext.kotlinVersion}")
+        
+        // ❌ НЕ ДОЛЖНО БЫТЬ ЗДЕСЬ:
+        // implementation "androidx.appcompat:appcompat:..."  ← ОШИБКА!
     }
 }
 
@@ -66,7 +70,7 @@ allprojects {
     }
 }`;
 
-  const appBuildGradle = `// android/app/build.gradle
+  const appBuildGradleCorrect = `// android/app/build.gradle — ПРАВИЛЬНАЯ ВЕРСИЯ
 
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
@@ -106,10 +110,11 @@ android {
 }
 
 dependencies {
+    // ✅ ЗДЕСЬ можно использовать implementation!
     implementation("com.facebook.react:react-android")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlinVersion}")
     
-    // AndroidX dependencies
+    // ✅ AndroidX зависимости (двойные кавычки для интерполяции!)
     implementation "androidx.appcompat:appcompat:\${rootProject.ext.androidxAppCompatVersion}"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:\${rootProject.ext.androidxSwiperefreshlayoutVersion}"
 }`;
@@ -137,18 +142,9 @@ pluginManagement {
 org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
 org.gradle.parallel=true
 
-# Use this property to specify which architecture you want to build.
-# You can also override it from the CLI using
-# ./gradlew <task> -PreactNativeArchitectures=x86_64
 reactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64
-
-# Use this property to enable support to the new architecture.
 newArchEnabled=false
-
-# Use this property to enable or disable the Hermes JS engine.
 hermesEnabled=true
-
-# Enable GIF support in React Native images
 reactNative.useNewArch=false`;
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
@@ -184,44 +180,38 @@ reactNative.useNewArch=false`;
           <div className="space-y-4">
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
               <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-                <span className="text-2xl">❌</span> Ошибки сборки
+                <span className="text-2xl">❌</span> Текущая ошибка
               </h3>
 
               <div className="space-y-3">
                 <div className="border-l-4 border-red-500 pl-3">
-                  <p className="text-xs font-bold text-red-500 uppercase mb-1">Ошибка 1 (текущая)</p>
-                  <p className="text-sm font-mono">
-                    Could not get unknown property 'androidxAppCompatVersion' for object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler
+                  <p className="text-xs font-bold text-red-500 uppercase mb-1">Ошибка (строка 36)</p>
+                  <p className="text-sm font-mono break-all">
+                    Could not find method implementation() for arguments [androidx.appcompat:appcompat:$&#123;rootProject.ext.androidxAppCompatVersion&#125;] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    📍 app/build.gradle, строка 35
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-yellow-500 pl-3">
-                  <p className="text-xs font-bold text-yellow-600 uppercase mb-1">⚠️ Предупреждение</p>
-                  <p className="text-sm">
-                    Using flatDir should be avoided because it doesn't support any meta-data formats
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    📍 app/build.gradle (репозиторий flatDir)
+                    📍 android/build.gradle, строка 36
                   </p>
                 </div>
               </div>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-2">📋 Предыдущие ошибки (исправлены)</h3>
-              <ul className="text-xs space-y-1 text-gray-600">
-                <li>✓ compileSdkVersion не определён</li>
-                <li>✓ Repository warnings от init.gradle</li>
-              </ul>
-            </div>
-
-            <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-2">⏱️ Время сборки</h3>
-              <p className="text-sm">BUILD FAILED in <span className="font-mono font-bold text-red-500">6s</span></p>
-              <p className="text-xs text-gray-500 mt-1">Gradle 8.14.3</p>
+              <h3 className="font-bold mb-2">📊 История ошибок</h3>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span className="line-through text-gray-500">compileSdkVersion не определён</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span className="line-through text-gray-500">androidxAppCompatVersion не определён</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-red-500 font-bold">✗</span>
+                  <span className="text-red-600 font-bold">implementation() в buildscript.dependencies</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -233,82 +223,85 @@ reactNative.useNewArch=false`;
               <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
                 <span className="text-2xl">🔍</span> Причина ошибки
               </h3>
-              <p className="text-sm leading-relaxed">
-                Свойство <code className="bg-red-100 text-red-800 px-1 rounded text-xs">androidxAppCompatVersion</code> не определено в блоке <code className="bg-blue-100 text-blue-800 px-1 rounded">ext</code> файла <code className="bg-gray-100 px-1 rounded text-xs">android/build.gradle</code>, но используется в <code className="bg-gray-100 px-1 rounded text-xs">android/app/build.gradle</code> (строка 35).
+              <p className="text-sm leading-relaxed mb-3">
+                Метод <code className="bg-red-100 text-red-800 px-1 rounded text-xs font-bold">implementation</code> используется <span className="font-bold text-red-600">в неправильном месте</span>.
               </p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-xs text-red-800">
+                  <span className="font-bold">❌ НЕПРАВИЛЬНО:</span> Вы добавили <code>implementation</code> зависимости в блок <code>buildscript.dependencies</code> файла <code>android/build.gradle</code>
+                </p>
+              </div>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-3">🔗 Цепочка зависимости</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">1</span>
-                  <span><code className="text-xs bg-gray-100 px-1 rounded">android/build.gradle</code></span>
+              <h3 className="font-bold mb-3">📚 Как работает Gradle</h3>
+              <div className="space-y-4">
+                <div className="border-l-4 border-blue-500 pl-3">
+                  <p className="text-sm font-bold text-blue-700">buildscript.dependencies</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Используется <span className="font-bold">ТОЛЬКО</span> для Gradle плагинов. Здесь доступен метод:
+                  </p>
+                  <div className={`${codeBg} rounded-lg p-2 mt-2 text-xs font-mono`}>
+                    <pre>classpath("com.android.tools.build:gradle:8.1.1")</pre>
+                  </div>
                 </div>
-                <div className="ml-3 text-xs text-gray-500">
-                  Должен определять <code className="bg-blue-100 text-blue-800 px-1 rounded">ext {'{'} androidxAppCompatVersion = "1.6.1" {'}'}</code>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold">2</span>
-                  <span><code className="text-xs bg-gray-100 px-1 rounded">android/app/build.gradle</code></span>
-                </div>
-                <div className="ml-3 text-xs text-gray-500">
-                  Использует <code className="bg-blue-100 text-blue-800 px-1 rounded">rootProject.ext.androidxAppCompatVersion</code> в dependencies
+
+                <div className="border-l-4 border-green-500 pl-3">
+                  <p className="text-sm font-bold text-green-700">app/build.gradle → dependencies</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Используется для библиотек приложения. Здесь доступны методы:
+                  </p>
+                  <div className={`${codeBg} rounded-lg p-2 mt-2 text-xs font-mono`}>
+                    <pre>{`implementation "androidx.appcompat:appcompat:1.6.1"
+implementation "com.facebook.react:react-android"`}</pre>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-3">⚠️ О предупреждении flatDir</h3>
-              <p className="text-xs text-gray-500 mb-2">
-                flatDir — это устаревший способ подключения локальных библиотек. Если у вас есть:
-              </p>
-              <div className={`${codeBg} rounded-lg p-3 text-xs font-mono`}>
-                <pre>{`repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}`}</pre>
+              <h3 className="font-bold mb-3">🎯 Что произошло</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                  <div>
+                    <p className="font-bold">Предыдущая ошибка:</p>
+                    <p className="text-xs text-gray-600">androidxAppCompatVersion не определён</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                  <div>
+                    <p className="font-bold">Вы добавили переменную в ext ✓</p>
+                    <p className="text-xs text-gray-600">Но также скопировали зависимости в buildscript</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                  <div>
+                    <p className="font-bold text-red-600">Результат:</p>
+                    <p className="text-xs text-gray-600">implementation() не существует в buildscript.dependencies</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Это можно удалить, если вы не используете локальные .jar/.aar файлы. Или замените на maven репозиторий.
-              </p>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-3">📦 Необходимые переменные в ext</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">buildToolsVersion = "34.0.0"</code></span>
+              <h3 className="font-bold mb-3">⚠️ Вторая проблема: Кавычки</h3>
+              <p className="text-xs text-gray-600 mb-2">
+                В ошибке видно: <code className="bg-gray-100 px-1 rounded">appcompat:$&#123;rootProject.ext.androidxAppCompatVersion&#125;</code>
+              </p>
+              <p className="text-xs text-gray-600 mb-2">
+                Переменная <span className="font-bold">не интерполируется</span>, потому что строка в одинарных кавычках.
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-red-50 border border-red-200 rounded p-2">
+                  <p className="font-bold text-red-700 mb-1">❌ Неправильно:</p>
+                  <code className="text-red-800 break-all">'...:$&#123;rootProject.ext.var&#125;'</code>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">minSdkVersion = 21</code></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">compileSdkVersion = 34</code></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">targetSdkVersion = 34</code></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">ndkVersion = "25.1.8937393"</code></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span><code className="bg-gray-100 px-1 rounded">kotlinVersion = "1.9.22"</code></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold">✗</span>
-                  <span><code className="bg-red-100 px-1 rounded">androidxAppCompatVersion = "1.6.1"</code> <span className="text-red-500">(ОТСУТСТВУЕТ!)</span></span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold">✗</span>
-                  <span><code className="bg-red-100 px-1 rounded">androidxSwiperefreshlayoutVersion = "1.1.0"</code> <span className="text-red-500">(ОТСУТСТВУЕТ!)</span></span>
+                <div className="bg-green-50 border border-green-200 rounded p-2">
+                  <p className="font-bold text-green-700 mb-1">✓ Правильно:</p>
+                  <code className="text-green-800 break-all">"...:$&#123;rootProject.ext.var&#125;"</code>
                 </div>
               </div>
             </div>
@@ -320,84 +313,113 @@ reactNative.useNewArch=false`;
           <div className="space-y-4">
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
               <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-                <span className="text-2xl">✅</span> Быстрое решение
+                <span className="text-2xl">✅</span> Решение
               </h3>
 
               <div className="space-y-4">
-                <div className="border-l-4 border-green-500 pl-3">
-                  <p className="text-sm font-bold mb-2">Шаг 1: Добавьте недостающие переменные в android/build.gradle</p>
-                  <p className="text-xs text-gray-500 mb-2">Откройте <code>android/build.gradle</code> и добавьте в блок <code>ext</code>:</p>
+                <div className="border-l-4 border-red-500 pl-3">
+                  <p className="text-sm font-bold mb-2 text-red-700">Шаг 1: УДАЛИТЕ implementation из android/build.gradle</p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Откройте <code>android/build.gradle</code>, найдите строку 36 и удалите все строки с <code>implementation</code> из блока <code>buildscript.dependencies</code>.
+                  </p>
                   <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
                     <button
-                      onClick={() => copyToClipboard(`androidxAppCompatVersion = "1.6.1"\nandroidxSwiperefreshlayoutVersion = "1.1.0"`, 'ext-vars')}
+                      onClick={() => copyToClipboard(`// ❌ УДАЛИТЕ ЭТИ СТРОКИ из buildscript.dependencies:
+implementation "androidx.appcompat:appcompat:..."
+implementation "androidx.swiperefreshlayout:..."
+
+// ✅ ОСТАВЬТЕ ТОЛЬКО classpath:
+dependencies {
+    classpath("com.android.tools.build:gradle:8.1.1")
+    classpath("com.facebook.react:react-native-gradle-plugin")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:\${project.ext.kotlinVersion}")
+}`, 'remove-impl')}
                       className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
                     >
-                      {copiedBlock === 'ext-vars' ? '✓' : '📋'}
+                      {copiedBlock === 'remove-impl' ? '✓' : '📋'}
                     </button>
-                    <pre>{`ext {
+                    <pre className="whitespace-pre-wrap">{`// ❌ УДАЛИТЕ ЭТИ СТРОКИ из buildscript.dependencies:
+implementation "androidx.appcompat:appcompat:..."
+implementation "androidx.swiperefreshlayout:..."
+
+// ✅ ОСТАВЬТЕ ТОЛЬКО classpath:
+dependencies {
+    classpath("com.android.tools.build:gradle:8.1.1")
+    classpath("com.facebook.react:react-native-gradle-plugin")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:\${project.ext.kotlinVersion}")
+}`}</pre>
+                  </div>
+                </div>
+
+                <div className="border-l-4 border-green-500 pl-3">
+                  <p className="text-sm font-bold mb-2 text-green-700">Шаг 2: Добавьте dependencies в android/app/build.gradle</p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Переместите <code>implementation</code> зависимости в <code>android/app/build.gradle</code>. Используйте <span className="font-bold text-green-600">двойные кавычки</span> для интерполяции переменных!
+                  </p>
+                  <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
+                    <button
+                      onClick={() => copyToClipboard(`dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlinVersion}")
+    
+    // ✅ Двойные кавычки для интерполяции!
+    implementation "androidx.appcompat:appcompat:\${rootProject.ext.androidxAppCompatVersion}"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:\${rootProject.ext.androidxSwiperefreshlayoutVersion}"
+}`, 'add-deps')}
+                      className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
+                    >
+                      {copiedBlock === 'add-deps' ? '✓' : '📋'}
+                    </button>
+                    <pre className="whitespace-pre-wrap">{`dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlinVersion}")
+    
+    // ✅ Двойные кавычки для интерполяции!
+    implementation "androidx.appcompat:appcompat:\${rootProject.ext.androidxAppCompatVersion}"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:\${rootProject.ext.androidxSwiperefreshlayoutVersion}"
+}`}</pre>
+                  </div>
+                </div>
+
+                <div className="border-l-4 border-green-500 pl-3">
+                  <p className="text-sm font-bold mb-2 text-green-700">Шаг 3: Убедитесь что ext содержит переменные</p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    В <code>android/build.gradle</code> блок <code>ext</code> должен содержать:
+                  </p>
+                  <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
+                    <button
+                      onClick={() => copyToClipboard(`ext {
     buildToolsVersion = "34.0.0"
     minSdkVersion = 21
     compileSdkVersion = 34
     targetSdkVersion = 34
     ndkVersion = "25.1.8937393"
     kotlinVersion = "1.9.22"
-    
-    <span className="text-yellow-300 font-bold">// Добавьте эти строки:</span>
-    <span className="text-green-400">androidxAppCompatVersion = "1.6.1"</span>
-    <span className="text-green-400">androidxSwiperefreshlayoutVersion = "1.1.0"</span>
-}`}</pre>
-                  </div>
-                </div>
-
-                <div className="border-l-4 border-green-500 pl-3">
-                  <p className="text-sm font-bold mb-2">Шаг 2: Проверьте строку 35 в app/build.gradle</p>
-                  <p className="text-xs text-gray-500 mb-2">Убедитесь, что dependencies использует правильные переменные:</p>
-                  <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
-                    <button
-                      onClick={() => copyToClipboard(`implementation "androidx.appcompat:appcompat:\${rootProject.ext.androidxAppCompatVersion}"`, 'appcompat-dep')}
+    androidxAppCompatVersion = "1.6.1"
+    androidxSwiperefreshlayoutVersion = "1.1.0"
+}`, 'ext-block')}
                       className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
                     >
-                      {copiedBlock === 'appcompat-dep' ? '✓' : '📋'}
+                      {copiedBlock === 'ext-block' ? '✓' : '📋'}
                     </button>
-                    <pre>{`dependencies {
-    implementation("com.facebook.react:react-android")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${rootProject.ext.kotlinVersion}")
-    
-    <span className="text-yellow-300 font-bold">// Строка 35 должна быть:</span>
-    <span className="text-green-400">implementation "androidx.appcompat:appcompat:\${rootProject.ext.androidxAppCompatVersion}"</span>
+                    <pre className="whitespace-pre-wrap">{`ext {
+    buildToolsVersion = "34.0.0"
+    minSdkVersion = 21
+    compileSdkVersion = 34
+    targetSdkVersion = 34
+    ndkVersion = "25.1.8937393"
+    kotlinVersion = "1.9.22"
+    androidxAppCompatVersion = "1.6.1"
+    androidxSwiperefreshlayoutVersion = "1.1.0"
 }`}</pre>
                   </div>
                 </div>
 
-                <div className="border-l-4 border-green-500 pl-3">
-                  <p className="text-sm font-bold mb-2">Шаг 3: Удалите flatDir (опционально)</p>
-                  <p className="text-xs text-gray-500 mb-2">Если в <code>app/build.gradle</code> есть блок <code>flatDir</code>, удалите его:</p>
+                <div className="border-l-4 border-blue-500 pl-3">
+                  <p className="text-sm font-bold mb-2 text-blue-700">Шаг 4: Пересоберите</p>
                   <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
                     <button
-                      onClick={() => copyToClipboard(`// УДАЛИТЕ этот блок:
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}`, 'flatdir')}
-                      className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
-                    >
-                      {copiedBlock === 'flatdir' ? '✓' : '📋'}
-                    </button>
-                    <pre>{`<span className="text-red-400">// УДАЛИТЕ этот блок:</span>
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}`}</pre>
-                  </div>
-                </div>
-
-                <div className="border-l-4 border-green-500 pl-3">
-                  <p className="text-sm font-bold mb-2">Шаг 4: Очистите кэш и пересоберите</p>
-                  <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
-                    <button
-                      onClick={() => copyToClipboard('cd android && gradlew clean && gradlew assembleDebug', 'cmd')}
+                      onClick={() => copyToClipboard('cd android && gradlew.bat clean && gradlew.bat assembleDebug', 'cmd')}
                       className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
                     >
                       {copiedBlock === 'cmd' ? '✓' : '📋'}
@@ -411,26 +433,19 @@ gradlew.bat assembleDebug</pre>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
-              <h3 className="font-bold mb-3">🔄 Альтернатива: Указать версии напрямую</h3>
-              <p className="text-xs text-gray-500 mb-2">Если не хотите использовать переменные, укажите версии напрямую:</p>
-              <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto relative`}>
-                <button
-                  onClick={() => copyToClipboard(`dependencies {
-    implementation("com.facebook.react:react-android")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-}`, 'direct-deps')}
-                  className="absolute top-2 right-2 bg-white/10 hover:bg-white/20 rounded px-2 py-1 text-xs"
-                >
-                  {copiedBlock === 'direct-deps' ? '✓' : '📋'}
-                </button>
-                <pre>{`dependencies {
-    implementation("com.facebook.react:react-android")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-}`}</pre>
+              <h3 className="font-bold mb-3">💡 Запомните правило</h3>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm font-bold text-yellow-800 mb-2">📌 Где какие зависимости:</p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-start gap-2">
+                    <span className="font-mono bg-blue-100 text-blue-800 px-2 py-0.5 rounded shrink-0">build.gradle</span>
+                    <span>→ <code className="bg-blue-100 px-1 rounded">classpath()</code> (только плагины Gradle)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-mono bg-green-100 text-green-800 px-2 py-0.5 rounded shrink-0">app/build.gradle</span>
+                    <span>→ <code className="bg-green-100 px-1 rounded">implementation</code> (библиотеки приложения)</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -442,30 +457,32 @@ gradlew.bat assembleDebug</pre>
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
               <h3 className="font-bold mb-3 flex items-center gap-2">
                 <span>📄</span> android/build.gradle
+                <span className="ml-auto text-xs bg-green-500 text-white px-2 py-0.5 rounded">ПРАВИЛЬНО</span>
                 <button
-                  onClick={() => copyToClipboard(rootBuildGradle, 'full-root')}
-                  className="ml-auto bg-red-700 text-white rounded px-2 py-1 text-xs"
+                  onClick={() => copyToClipboard(rootBuildGradleCorrect, 'full-root')}
+                  className="bg-red-700 text-white rounded px-2 py-1 text-xs"
                 >
                   {copiedBlock === 'full-root' ? '✓ Скопировано' : '📋 Копировать'}
                 </button>
               </h3>
               <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto max-h-64 overflow-y-auto`}>
-                <pre className="whitespace-pre-wrap">{rootBuildGradle}</pre>
+                <pre className="whitespace-pre-wrap">{rootBuildGradleCorrect}</pre>
               </div>
             </div>
 
             <div className={`${cardBg} rounded-xl p-4 shadow-sm`}>
               <h3 className="font-bold mb-3 flex items-center gap-2">
                 <span>📄</span> android/app/build.gradle
+                <span className="ml-auto text-xs bg-green-500 text-white px-2 py-0.5 rounded">ПРАВИЛЬНО</span>
                 <button
-                  onClick={() => copyToClipboard(appBuildGradle, 'full-app')}
-                  className="ml-auto bg-red-700 text-white rounded px-2 py-1 text-xs"
+                  onClick={() => copyToClipboard(appBuildGradleCorrect, 'full-app')}
+                  className="bg-red-700 text-white rounded px-2 py-1 text-xs"
                 >
                   {copiedBlock === 'full-app' ? '✓ Скопировано' : '📋 Копировать'}
                 </button>
               </h3>
               <div className={`${codeBg} rounded-lg p-3 text-xs font-mono overflow-x-auto max-h-64 overflow-y-auto`}>
-                <pre className="whitespace-pre-wrap">{appBuildGradle}</pre>
+                <pre className="whitespace-pre-wrap">{appBuildGradleCorrect}</pre>
               </div>
             </div>
 
