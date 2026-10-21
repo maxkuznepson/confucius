@@ -6,6 +6,7 @@ import { StudentPage } from './pages/StudentPage';
 import { ParentPage } from './pages/ParentPage';
 import { TeacherPage } from './pages/TeacherPage';
 import { DebugPage } from './pages/DebugPage';
+import { BuildFixPage } from './pages/BuildFixPage';
 
 function Router() {
   const { currentPath } = useApp();
@@ -36,6 +37,10 @@ function Router() {
 
   if (currentPath === '/debug') {
     return <DebugPage />;
+  }
+
+  if (currentPath === '/build-fix') {
+    return <BuildFixPage />;
   }
 
   return <LoginPage />;

@@ -3,7 +3,7 @@ import { useApp } from '../contexts/AppContext';
 import { TopAppBar } from '../components/TopAppBar';
 
 export function DebugPage() {
-  const { lang, darkMode, auth, currentPath, history, apiStatus } = useApp();
+  const { lang, darkMode, auth, currentPath, history, apiStatus, navigateTo } = useApp();
 
   const storageData = {
     lang: localStorage.getItem('confucius_lang'),
@@ -87,6 +87,12 @@ export function DebugPage() {
             className="w-full py-3 rounded-xl bg-red-500 text-white font-bold"
           >
             🗑️ Очистить localStorage
+          </button>
+          <button
+            onClick={() => navigateTo('/build-fix')}
+            className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold"
+          >
+            🔧 Исправление ошибки сборки (Gradle)
           </button>
         </div>
 

@@ -187,14 +187,21 @@ export function LoginPage() {
             )}
           </div>
 
-          {/* Debug link */}
-          <div className="text-center mt-2">
+          {/* Debug & Build Fix links */}
+          <div className="text-center mt-2 flex justify-center gap-4">
             <button
               type="button"
               onClick={() => navigateTo('/debug')}
               className={`text-xs underline ${darkMode ? 'text-[#E8D9A0]/50' : 'text-gray-500'}`}
             >
               🔧 Debug Page
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo('/build-fix')}
+              className={`text-xs underline ${darkMode ? 'text-[#E8D9A0]/50' : 'text-gray-500'}`}
+            >
+              🏗️ Build Fix (Gradle)
             </button>
           </div>
 
